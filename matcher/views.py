@@ -6,7 +6,7 @@ import logging
 
 import messages
 from .models import Pool, Person, Round, Match
-from .slack import client
+from .slack import client, send_dm
 from meetups.settings import ADMIN_SLACK_USERNAME
 
 
@@ -85,7 +85,7 @@ def update_availability(payload, action, block_id):
         message = messages.UPDATED_AVAILABLE
     else:
         message = messages.UPDATED_UNAVAILABLE
-    client.send_dm(user_id, text=message)
+    send_dm(user_id, text=message)
     # a Person can be either `person_1` or `person_2` on a Match; it's random
     user_matches = Match.objects.filter(person_1=user_id) | Match.objects.filter(person_2=user_id)
     if not len(user_matches):
@@ -99,7 +99,7 @@ def update_availability(payload, action, block_id):
         other_person = get_other_person_from_match(user_id, latest_match)
         # example: "Monday, May 5"
         date_format = "%A, %b %-d"
-        client.send_dm(user_id, blocks=messages.BLOCKS["ASK_IF_MET"])
+        send_dm(user_id, blocks=messages.BLOCKS["ASK_IF_MET"])
     return HttpResponse(204)
 
 
@@ -135,7 +135,7 @@ def update_met(payload, action, block_id):
         message = messages.MET
     else:
         message = messages.DID_NOT_MEET
-    client.send_dm(user_id, text=message)
+    send_dm(user_id, text=message)
     return HttpResponse(204)
     
 
@@ -153,7 +153,7 @@ def update_intro(event):
         else:
             contact_phrase = "."
         logger.warn(f"Received unknown query from {person}: \"{message_text}\".")
-        client.send_dm(user_id, text=messages.UNKNOWN_QUERY)
+        send_dm(user_id, text=messages.UNKNOWN_QUERY)
     else:
         person.intro = message_text
         # assume availability for a person's first time
@@ -165,7 +165,7 @@ def update_intro(event):
         message = messages.INTRO_RECEIVED
         if ADMIN_SLACK_USERNAME:
             message += (" " + messages.INTRO_RECEIVED_QUESTIONS)
-        client.send_dm(user_id, text=message)
+        send_dm(user_id, text=message)
     return HttpResponse(204)
 
 

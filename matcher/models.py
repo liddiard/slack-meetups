@@ -4,7 +4,7 @@ from django.db import models
 import logging
 
 import messages
-from .slack import client
+from .slack import client, send_dm
 
 
 # Get an instance of a logger
@@ -87,8 +87,7 @@ def ask_availability(round):
             person.pools.remove(round.pool)
             logger.info(f"Removed {person} from pool \"{round.pool}\".")
             continue
-        client.send_dm(person.user_id, 
-            blocks=messages.BLOCKS["ASK_IF_AVAILABLE"])
+        send_dm(person.user_id, blocks=messages.BLOCKS["ASK_IF_AVAILABLE"])
     for user_id in channel_members:
         try:
             Person.objects.get(user_id=user_id)
@@ -103,12 +102,12 @@ def ask_availability(round):
             person.save()
             person.pools.add(obj)
             logger.info(f"Added {person} to pool \"{round.pool}\".")
-            client.send_dm(user_id, text=messages.WELCOME_INTRO_1)
-            client.send_dm(user_id, text=messages.WELCOME_INTRO_2)
+            send_dm(user_id, text=messages.WELCOME_INTRO_1)
+            send_dm(user_id, text=messages.WELCOME_INTRO_2)
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 
 def send_matching_message(recipient, match):
-    client.send_dm(recipient.user_id, text=messages.MATCH_1)
-    client.send_dm(recipient.user_id, text=messages.MATCH_2)
+    send_dm(recipient.user_id, text=messages.MATCH_1)
+    send_dm(recipient.user_id, text=messages.MATCH_2)
     logger.info(f"Sent matching messages for match: {match}.")
