@@ -19,7 +19,6 @@ from matcher import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('person/', views.person),
-    path('availability/ask', views.ask_availability),
-    path('availability/update', views.update_availability),
+    path('slack/action/', views.handle_slack_action),
+    path('slack/message/', views.handle_slack_message)
 ]

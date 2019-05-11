@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8w10v^xg$cywiq+0@t6ea_v$76m9@y9twej@-t2^vexso%(3$q'
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -44,7 +44,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -120,5 +119,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team?
+# token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
 SLACK_API_TOKEN = os.environ.get('SLACK_API_TOKEN')
+
+# Slack username of the admin for this Slack application who users should reach
+# out to if they have questions
+ADMIN_SLACK_USERNAME = os.environ.get('ADMIN_SLACK_USERNAME')
