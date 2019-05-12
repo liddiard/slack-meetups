@@ -24,7 +24,7 @@ class Person(models.Model):
     given_name = models.CharField(max_length=64)
     surname = models.CharField(max_length=64)
     intro = models.TextField(blank=True)
-    available = models.BooleanField(default=False)
+    available = models.BooleanField(null=True) # `null` corresponds to unknown
     can_be_excluded = models.BooleanField(default=False)
     pools = models.ManyToManyField(Pool, blank=True)
     joined = models.DateTimeField(auto_now_add=True)
@@ -78,8 +78,8 @@ def ask_availability(round):
     channel_info = client.channels_info(channel=round.pool.channel_id)
     channel_members = channel_info["channel"]["members"]
     people = Person.objects.filter(pools=round.pool)
-    # initially set everyone's availability to False
-    people.update(available=False)
+    # initially set everyone's availability to unknown
+    people.update(available=None)
     for person in people:
         # if this person has left this pool, update the database to reflect 
         # this and don't send them a request for availability
