@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 import logging
 
-import messages
+import matcher.messages as messages
 from .models import Pool, Person, Round, Match
 from .slack import client, send_dm
 from meetups.settings import ADMIN_SLACK_USERNAME
@@ -95,11 +95,16 @@ def update_availability(payload, action, block_id):
     # if the Person or their match hasn't already provided feedback on their
     # last match, ask if they met
     if latest_match.met is None:
-        # variable used in message string
-        other_person = get_other_person_from_match(user_id, latest_match)
         # example: "Monday, May 5"
         date_format = "%A, %b %-d"
-        send_dm(user_id, blocks=messages.BLOCKS["ASK_IF_MET"])
+        other_person = get_other_person_from_match(user_id, latest_match)
+        blocks = messages.format_block_text(
+            "ASK_IF_MET", 
+            latest_match.id, 
+            { "other_person": other_person, 
+              "start_date": latest_match.start_date.strftime(date_format) }
+        )
+        send_dm(user_id, blocks=blocks)
     return HttpResponse(204)
 
 
@@ -132,7 +137,7 @@ def update_met(payload, action, block_id):
     match.save()
     logger.info(f"Updated match \"{match}\" \"met\" value to {match.met}.")
     if met:
-        message = messages.MET
+        message = messages.MET.format({ "other_person": other_person })
     else:
         message = messages.DID_NOT_MEET
     send_dm(user_id, text=message)
@@ -153,7 +158,8 @@ def update_intro(event):
         else:
             contact_phrase = "."
         logger.warn(f"Received unknown query from {person}: \"{message_text}\".")
-        send_dm(user_id, text=messages.UNKNOWN_QUERY)
+        send_dm(user_id, 
+            text=messages.UNKNOWN_QUERY.format({ "contact_phrase": contact_phrase }))
     else:
         person.intro = message_text
         # assume availability for a person's first time
@@ -162,9 +168,10 @@ def update_intro(event):
         person.available = True
         person.save()
         logger.info(f"Onboarded {person} with intro!")
-        message = messages.INTRO_RECEIVED
+        message = messages.INTRO_RECEIVED.format({ "person": person })
         if ADMIN_SLACK_USERNAME:
-            message += (" " + messages.INTRO_RECEIVED_QUESTIONS)
+            message += (" " + messages.INTRO_RECEIVED_QUESTIONS\
+                .format({ "ADMIN_SLACK_USERNAME": ADMIN_SLACK_USERNAME }))
         send_dm(user_id, text=message)
     return HttpResponse(204)
 

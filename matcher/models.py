@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from django.db import models
 import logging
 
-import messages
+import matcher.messages as messages
 from .slack import client, send_dm
 
 
@@ -19,7 +19,7 @@ class Pool(models.Model):
         return self.name
 
 class Person(models.Model):
-    user_id = models.CharField(max_length=9, unique=True, index=True)
+    user_id = models.CharField(max_length=9, unique=True, db_index=True)
     username = models.CharField(max_length=32, unique=True)
     given_name = models.CharField(max_length=64)
     surname = models.CharField(max_length=64)
@@ -87,7 +87,12 @@ def ask_availability(round):
             person.pools.remove(round.pool)
             logger.info(f"Removed {person} from pool \"{round.pool}\".")
             continue
-        send_dm(person.user_id, blocks=messages.BLOCKS["ASK_IF_AVAILABLE"])
+        blocks = messages.format_block_text(
+            "ASK_IF_AVAILABLE", 
+            person.id,
+            { "person": person }
+        )
+        send_dm(person.user_id, blocks=blocks)
     for user_id in channel_members:
         try:
             Person.objects.get(user_id=user_id)
@@ -102,12 +107,15 @@ def ask_availability(round):
             person.save()
             person.pools.add(obj)
             logger.info(f"Added {person} to pool \"{round.pool}\".")
-            send_dm(user_id, text=messages.WELCOME_INTRO_1)
+            send_dm(user_id, 
+                text=messages.WELCOME_INTRO_1.format({ "person": person }))
             send_dm(user_id, text=messages.WELCOME_INTRO_2)
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 
 def send_matching_message(recipient, match):
-    send_dm(recipient.user_id, text=messages.MATCH_1)
-    send_dm(recipient.user_id, text=messages.MATCH_2)
+    send_dm(recipient.user_id, 
+        text=messages.MATCH_1.format({ "recipient": recipient, "match": match }))
+    send_dm(recipient.user_id, 
+        text=messages.MATCH_2.format({ "match": match }))
     logger.info(f"Sent matching messages for match: {match}.")
