@@ -1,6 +1,5 @@
 # all messages sent to the user are stored here
-# prefer the use of F-strings unless there's a need to deviate
-# https://www.python.org/dev/peps/pep-0498/
+# use strings with named variables that can be formatted with str.format()
 
 WELCOME_INTRO_1 = "Hey {person.given_name}, welcome and thanks for joining #{person.pools[0].channel_name}! 🙂 Please *introduce yourself* below with a short description of what you do. This will be sent to the people you match with."
 WELCOME_INTRO_2 = "Once we have your introduction, we’ll get you your first match!"
