@@ -2,35 +2,36 @@
 {% block extrastyle %}
 <style>
     a:link, a:visited {
-        color: #0070ba;
+        color: #0070ba; /* Accessible Blue */
     }
     a:hover {
-        color: #005ea6;
+        color: #005ea6; /* Accessible Blue Hover */
     }
     .button, 
     input[type=button], 
     input[type=submit] {
         background: white;
-        border: 2px solid #0070ba;
-        color: #0070ba;
+        border: 2px solid #0070ba; /* Accessible Blue */
+        color: #0070ba; /* Accessible Blue */
     }
     input[type=submit].default {
-        background: #0070ba;
+        background: #0070ba; /* Accessible Blue */
         color: white;
     }
     input[type=submit].default:hover {
         border: 0;
-        background: #005ea6;
+        background: #005ea6; /* Accessible Blue Hover */
         color: white;
     }
     .button:hover, 
     input[type=button]:hover, 
     input[type=submit]:hover {
         background: white;
-        border: 2px solid #005ea6;
-        color: #005ea6;
+        border: 2px solid #005ea6; /* Accessible Blue Hover */
+        color: #005ea6; /* Accessible Blue Hover */
     }
     #header {
+        /* Accessible Blue Gradient */
         background: linear-gradient(to right, #0070ba, #1546a0);
         color: #bfdbee;
     }
@@ -39,23 +40,24 @@
         color: white;
     }
     .module caption {
-        background: #6c7378;
+        background: #6c7378; /* Secondary Grey */
     }
     div.breadcrumbs {
         background: white;
         color: inherit;
     }
     div.breadcrumbs a {
-        color: #0070ba;
+        color: #0070ba; /* Accessible Blue */
     }
     div.breadcrumbs a:hover {
-        color: #005ea6;
+        color: #005ea6; /* Accessible Blue Hover */
     }
     .module h2 {
-        background: #6c7378;
+        background: #6c7378; /* Secondary Grey */
     }
+    /* extra-specific selector to override Django's default */
     .submit-row .deletelink-box a.deletelink {
-        background: #d20000;
+        background: #d20000; /* Red */
     }
 </style>
 {% endblock %}
