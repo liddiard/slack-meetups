@@ -1,4 +1,5 @@
 import json
+import time
 
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -104,6 +105,8 @@ def update_availability(payload, action, block_id):
             { "other_person": other_person, 
               "start_date": latest_match.start_date.strftime(date_format) }
         )
+        # artificial delay so the user sees two discrete messages
+        time.sleep(2)
         send_dm(user_id, blocks=blocks)
     return HttpResponse(204)
 
