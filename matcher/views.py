@@ -72,7 +72,6 @@ def update_availability(payload, action, block_id):
     else:
         return JsonResponse(status=400, 
             data={"error": f"invalid action value \"{action.get('value')}\""})
-    # TODO: validate input
     try:
         user_id = payload["user"]["id"]
     except KeyError:
@@ -160,7 +159,7 @@ def update_intro(event):
             contact_phrase = f", @{ADMIN_SLACK_USERNAME}!"
         else:
             contact_phrase = "."
-        logger.warn(f"Received unknown query from {person}: \"{message_text}\".")
+        logger.info(f"Received unknown query from {person}: \"{message_text}\".")
         send_dm(user_id, 
             text=messages.UNKNOWN_QUERY.format({ "contact_phrase": contact_phrase }))
     else:
