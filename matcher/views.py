@@ -165,7 +165,7 @@ def update_intro(event):
     else:
         person.intro = message_text
         # assume availability for a person's first time
-        # if the have an issue with this, they can contact 
+        # if people have an issue with this, they can contact 
         # `ADMIN_SLACK_USERNAME`. Might revisit if this causes issues.
         person.available = True
         person.save()
