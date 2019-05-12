@@ -10,7 +10,7 @@
 
 ### MVP
 
-- validate that incoming Slack requests are sent from the actual person
+- validate that incoming Slack requests are sent from the actual person: https://api.slack.com/docs/verifying-requests-from-slack
 - more comprehensive validation of API input
 
 ### Post-MVP

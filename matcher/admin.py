@@ -8,18 +8,36 @@ from .slack import client
 from .utils import group
 
 
-@admin.register(Pool)
+class MatcherAdmin(admin.AdminSite):
+    site_header = "Matching administration"
+    site_title = "Matching admin"
+    index_title = "Bot administration"
+    site_url = None
+
+
+admin_site = MatcherAdmin()
+admin.site = admin_site # register our custom admin site with Django
+
+
+@admin.register(Pool, site=admin_site)
 class PoolAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("name", "channel_name")
+    search_fields = ("name", "channel_name")
 
 
-@admin.register(Person)
+@admin.register(Person, site=admin_site)
 class PersonAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("username", "given_name", "surname", "joined", "available")
+    list_filter = ("available",)
+    ordering = ("-joined",)
+    search_fields = ("username", "given_name", "surname")
 
 
-@admin.register(Round)
+@admin.register(Round, site=admin_site)
 class RoundAdmin(admin.ModelAdmin):
+    list_display = ("pool", "start_date", "end_date")
+    list_filter = ("pool",)
+    ordering = ("-start_date",)
     change_form_template = "round_change_form.html"
 
     def response_change(self, request, obj):
@@ -27,9 +45,12 @@ class RoundAdmin(admin.ModelAdmin):
             match(obj)
 
 
-@admin.register(Match)
+@admin.register(Match, site=admin_site)
 class MatchAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("person_1", "person_2", "round", "met")
+    list_filter = ("met", "round")
+    ordering = ("-round__start_date",)
+    search_fields = ("person_1__username", "person_2__username")
 
 
 def match(round):

@@ -31,13 +31,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'matcher',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'matcher'
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
@@ -121,6 +121,9 @@ STATIC_URL = '/static/'
 
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
 SLACK_API_TOKEN = os.environ.get('SLACK_API_TOKEN')
+
+# signing secret comes from this page: https://api.slack.com/apps/AH99D6ZLH
+SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET')
 
 # Slack username of the admin for this Slack application who users should reach
 # out to if they have questions
