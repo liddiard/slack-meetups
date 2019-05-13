@@ -3,6 +3,9 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
     <div class="submit-row">
-        <input type="submit" value="Do round matching" name="do-round-matching">
+        <span style="line-height: 2.5">
+            Perform matching for this round and send matching messages:
+        </span>
+        <input type="submit" class="default" value="Do round matching" name="do-round-matching">
     </div>
 {% endblock %}
