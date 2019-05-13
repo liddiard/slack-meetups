@@ -4,3 +4,4 @@ ngrok
 *.pyc
 matcher/migrations/
 app.yaml
+static/

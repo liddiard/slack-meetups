@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'matcher',
+    'matcher', # must come before Django admin app for CSS overrides
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,11 +74,24 @@ WSGI_APPLICATION = 'meetups.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+if os.environ.get('GAE_APPLICATION'):
+    # running in production, connect to local GCP SQL instance
+    DB_HOST = '/cloudsql/slack-meetups-01'
+    DB_PORT = None
+else:
+    # running in development, connect to proxied GCP SQL instance
+    DB_HOST = '127.0.0.1'
+    DB_PORT = '3306'
+    
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
+        'USER': 'meetups',
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'NAME': 'slack-meetups-01'
     }
 }
 
@@ -120,6 +133,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = 'static'
 
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
 SLACK_API_TOKEN = os.environ.get('SLACK_API_TOKEN')
