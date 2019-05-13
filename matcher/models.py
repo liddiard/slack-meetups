@@ -10,6 +10,13 @@ from .slack import client, send_dm
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+# default end date for a Round
+# https://stackoverflow.com/a/12654998
+def get_default_end_date():
+    # rounds typically start on a Monday and end on a Friday (5 days later)
+    return date.today() + timedelta(days=5)
+
+
 class Pool(models.Model):
     name = models.CharField(max_length=64, unique=True)
     channel_id = models.CharField(max_length=9, unique=True)
@@ -37,9 +44,8 @@ class Person(models.Model):
 
 class Round(models.Model):
     pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
-    # rounds typically start on a Monday and end on a Friday (5 days later)
     start_date = models.DateField(default=date.today)
-    end_date = models.DateField(default=(date.today() + timedelta(days=5)))
+    end_date = models.DateField(default=get_default_end_date)
 
     def save(self, *args, **kwargs):
         if not self.pk:
