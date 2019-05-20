@@ -85,7 +85,8 @@ class Round(models.Model):
     def __str__(self):
         # example: "Monday, Jan 9, 2019"
         date_format = "%A, %b %-d, %Y"
-        return f"{self.pool}: {self.start_date.strftime(date_format)} – {self.end_date.strftime(date_format)}"
+        return f"{self.pool}: {self.start_date.strftime(date_format)} – "
+            f"{self.end_date.strftime(date_format)}"
 
 class Match(models.Model):
     """a pairing between two People in a Round to meet each other
@@ -161,7 +162,8 @@ def ask_availability(round):
                 full_name = user["user"]["profile"]["real_name"]
             except KeyError:
                 send_dm(user_id, messages.PERSON_MISSING_NAME)
-                logger.warning(f"Slack \"real_name\" field missing for user: {user_id}")
+                logger.warning("Slack \"real_name\" field missing for user: "
+                    f"{user_id}")
                 continue
             person = Person(user_id=user_id, user_name=user["user"]["name"],
                 full_name=full_name,

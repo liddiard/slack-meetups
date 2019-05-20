@@ -96,7 +96,7 @@ BLOCKS = {
 def format_block_text(block_name, block_id, dictionary):
     """Format a 2-element block where the first item is a text block and the
     second item is an action block"""
-    # make a copy so we don't mutate the existing block
+    # make a deep copy so we don't mutate the block template
     block = copy.deepcopy(BLOCKS[block_name])
     block[0]["text"]["text"] = block[0]["text"]["text"].format_map(dictionary)
     block[1]["block_id"] = block[1]["block_id"].format(id=block_id)

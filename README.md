@@ -3,8 +3,24 @@
 ## Stack
 
 - Django running on Python 3.7+
-- SQLite database
+- Postgres on Google Cloud SQL (via proxy for local development)
 - Slack Python SDK
+
+## Development setup
+
+### Prerequisites
+
+- Python 3.7+
+- Pip 3
+- [Google Cloud SDK](https://cloud.google.com/sdk/)
+
+1. create a virtualenv folder: `mkdir meetups`
+2. install the virtualenv: `python3 -m venv meetups`
+3. `cd meetups`, `source bin/activate`
+4. clone repo into the virtualenv
+5. `cd [repo]`
+6. `pip3 install -r requirements.txt`
+7. follow SQL proxy instructions under "deployment instructions" below for database setup
 
 ## Deployment instructions
 
@@ -22,11 +38,15 @@
 runtime: python37
 
 env_variables:
+  ADMIN_SLACK_USER_ID: "[ADMIN_SLACK_USER_ID]"
   SECRET_KEY: "[SECRET_KEY]"
   SLACK_API_TOKEN: "[SLACK_API_TOKEN]"
   SLACK_SIGNING_SECRET: "[SLACK_SIGNING_SECRET]"
   DB_HOST: "/cloudsql/slack-meetups:us-west2:slack-meetups-01"
   DB_PASSWORD: "[DB_PASSWORD]"
+
+beta_settings:
+  cloud_sql_instances: "slack-meetups-01"
 
 handlers: 
 - url: /static
@@ -51,8 +71,7 @@ handlers:
 
 ### MVP
 
-- validate that incoming Slack requests are sent from the actual person: https://api.slack.com/docs/verifying-requests-from-slack
-- more comprehensive validation of API input
+requirements done!
 
 ### Post-MVP
 

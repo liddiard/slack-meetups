@@ -9,6 +9,7 @@ from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .middleware import VerifySlackRequest
 from .models import Person, Match
 from .slack import  send_dm
+from .utils import get_person_from_match, get_other_person_from_match
 
 
 logger = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ def handle_slack_action(request):
         action_func = action_map[block_type]
     except KeyError:
         return JsonResponse(status=400, 
-            data={"error": f"unknown action type \"{action.get('block_id')}\""})
+            data={"error": f"unknown action \"{action.get('block_id')}\""})
     return action_func(req, action, block_id)
 
 
@@ -145,7 +146,12 @@ def update_availability(payload, action, block_id):
     else:
         message = messages.UPDATED_UNAVAILABLE
     send_dm(user_id, text=message)
-    # ask a followup – did this person meet with their last match (if any)?
+    ask_if_met(user_id)
+    return HttpResponse(204)
+
+
+def ask_if_met(user_id):
+    # ask this person if they met up with their last match (if any)
     # a Person can be either `person_1` or `person_2` on a Match; it's random
     user_matches = (Match.objects.filter(person_1__user_id=user_id) | 
         Match.objects.filter(person_2__user_id=user_id))
@@ -167,7 +173,6 @@ def update_availability(payload, action, block_id):
              "start_date": latest_match.round.start_date.strftime(date_format)}
         )
         send_dm(user_id, blocks=blocks)
-    return HttpResponse(204)
 
 
 def update_met(payload, action, block_id):
@@ -192,12 +197,15 @@ def update_met(payload, action, block_id):
         match = user_matches.get(id=block_id)
     except Match.DoesNotExist:
         return JsonResponse(status=404, 
-            data={"error": f"match for user \"{user_id}\" with ID \"{block_id}\" does not exist"})
+            data={"error": f"match for user \"{user_id}\" with ID "
+                f"\"{block_id}\" does not exist"})
     # variables used in message string
     person = get_person_from_match(user_id, match)
     other_person = get_other_person_from_match(user_id, match)
     if match.met is not None and match.met != met:
-        logger.warning(f"Conflicting \"met\" info for match \"{match}\". Original value was {match.met}, new value from {person} is {met}.")
+        logger.warning(f"Conflicting \"met\" info for match \"{match}\". "
+            f"Original value was {match.met}, new value from {person} is "
+            f"{met}.")
     match.met = met
     match.save()
     logger.info(f"Updated match \"{match}\" \"met\" value to {match.met}.")
@@ -207,26 +215,3 @@ def update_met(payload, action, block_id):
         message = messages.DID_NOT_MEET
     send_dm(user_id, text=message)
     return HttpResponse(204)
-
-
-def get_person_from_match(user_id, match):
-    """given a Match, return the Person corresponding to the passed user ID
-    """
-    if match.person_1.user_id == user_id:
-        return match.person_1
-    elif match.person_2.user_id == user_id:
-        return match.person_2
-    else:
-        raise Exception(f"Person with user ID \"{user_id}\" is not part of the passed match ({match}).")
-
-
-def get_other_person_from_match(user_id, match):
-    """given a Match, return the Person corresponding to the user who is NOT
-    the passed user ID (i.e. the other Person)
-    """
-    if match.person_1.user_id == user_id:
-        return match.person_2
-    elif match.person_2.user_id == user_id:
-        return match.person_1
-    else:
-        raise Exception(f"Person with user ID \"{user_id}\" is not part of the passed match ({match}).")

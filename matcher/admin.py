@@ -82,7 +82,8 @@ def match(round):
     # note: this can be a slow query for large tables
     people_to_match = Person.objects.filter(pools=round.pool, available=True)\
         .order_by("?")
-    logger.info(f"Starting matching for round \"{round}\" with {len(people_to_match)} participants.")
+    logger.info(f"Starting matching for round \"{round}\" with "
+        f"{len(people_to_match)} participants.")
     if len(people_to_match) % 2 != 0:
         # we have an odd number of people and need to exclude someone from
         # this round
@@ -95,7 +96,8 @@ def match(round):
                 "excluded.")
         person_to_exclude = random.choice(excludable_people)
         people_to_match = people_to_match.exclude(id=person_to_exclude.id)
-        logger.info(f"Odd number of people ({len(people_to_match)}) for round \"{round}\", excluded {person_to_exclude}.")
+        logger.info(f"Odd number of people ({len(people_to_match)}) for round "
+            f"\"{round}\", excluded {person_to_exclude}.")
     # match adjacent people in our randomly-ordered list
     # IMPORTANT: list must have an even length before calling `group` below
     for pair in group(people_to_match, 2):
