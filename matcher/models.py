@@ -1,23 +1,27 @@
+import logging
 from datetime import date, timedelta
 
 from django.db import models
-import logging
 
 import matcher.messages as messages
 from .slack import client, send_dm
 
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# default end date for a Round
-# https://stackoverflow.com/a/12654998
+# this function must be defined before it's passed in the Round class below
 def get_default_end_date():
+    """calculate the default end date for a Round from the curent date
+    """
+    # https://stackoverflow.com/a/12654998
     # rounds typically start on a Monday and end on a Friday (5 days later)
     return date.today() + timedelta(days=5)
 
 
 class Pool(models.Model):
+    """a group of People in a Slack channel who are interested in meeting each
+    other
+    """
     name = models.CharField(max_length=64, unique=True)
     channel_id = models.CharField(max_length=9, unique=True)
     channel_name = models.CharField(max_length=21)
@@ -26,10 +30,23 @@ class Pool(models.Model):
         return self.name
 
 class Person(models.Model):
+    """corresponds to a Slack user; a single individual
+    """
     user_id = models.CharField(max_length=9, unique=True, db_index=True)
-    username = models.CharField(max_length=32, unique=True)
-    given_name = models.CharField(max_length=64)
-    surname = models.CharField(max_length=64)
+    # Slack user "names" are kind of confusing, may be disappearing, are not
+    # guaranteed to be unique... and should we even be storing this? It's 
+    # still useful though for organizations where `user_name`s correspond to
+    # corp IDs/emails. See:
+    # https://api.slack.com/changelog/2017-09-the-one-about-usernames
+    user_name = models.CharField(max_length=32)
+    full_name = models.CharField(max_length=128)
+    # `casual_name` _usually_ corresponds to first name and should _usually_ 
+    # be analogous to given name. More generally, it's how you'd say, "Hey
+    # {casual_name}, nice to meet you!" In an effort to make fewer assumptions
+    # about names (especially names as entered on Slack), store this as a 
+    # separate, editable field.
+    # https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/
+    casual_name = models.CharField(max_length=64)
     intro = models.TextField(blank=True)
     available = models.BooleanField(null=True) # `null` corresponds to unknown
     can_be_excluded = models.BooleanField(default=False)
@@ -39,10 +56,22 @@ class Person(models.Model):
     class Meta:
         verbose_name_plural = "people"
 
+    @staticmethod
+    def get_first_name(full_name):
+        # Get the first part of a Person's full name. If the person only has
+        # one name on Slack, it will return their full name. 
+        # N.B. This function is used in the context of getting a user's given 
+        # name, and this heuristic does not hold in places like China where 
+        # surname is first.
+        return full_name.strip().split(" ")[0]
+
     def __str__(self):
-        return f"{self.given_name} {self.surname} ({self.username})"
+        return f"{self.full_name} ({self.user_name})"
 
 class Round(models.Model):
+    """a time interval for a Pool in which specific People are paired together
+    in a Match to meet each other
+    """
     pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
     start_date = models.DateField(default=date.today)
     end_date = models.DateField(default=get_default_end_date)
@@ -59,11 +88,14 @@ class Round(models.Model):
         return f"{self.pool}: {self.start_date.strftime(date_format)} – {self.end_date.strftime(date_format)}"
 
 class Match(models.Model):
+    """a pairing between two People in a Round to meet each other
+    """
     person_1 = models.ForeignKey(Person, on_delete=models.CASCADE, 
         related_name="+")
     person_2 = models.ForeignKey(Person, on_delete=models.CASCADE, 
         related_name="+")
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
+    # whether or not this pair actually met
     met = models.BooleanField(null=True) # `null` corresponds to unknown
 
     class Meta:
@@ -74,20 +106,36 @@ class Match(models.Model):
             # automatically send matching messages when a match is created
             send_matching_message(self.person_1, self.person_2)
             send_matching_message(self.person_2, self.person_1)
-        super(MyModel, self).save(*args, **kwargs)
+        super(Match, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.person_1} ↔ {self.person_2} for round “{self.round}”"
 
 
 def ask_availability(round):
+    """message all members of a Round's Pool to ask if they're available for
+    the upcoming round, adding and removing Pool members based on the current
+    Slack channel membership
+    """
     channel_info = client.channels_info(channel=round.pool.channel_id)
+    # TODO: accessing channel members this way will be deprecated in the
+    # future. We will need to use conversations.members instead:
+    # https://api.slack.com/methods/conversations.members
+    # see: https://api.slack.com/changelog/2017-10-members-array-truncating
     channel_members = channel_info["channel"]["members"]
-    people = Person.objects.filter(pools=round.pool)
+    # Get the People in the DB for this Pool, excluding anyone who hasn't
+    # written an intro yet. We're considering them excluded, partially for
+    # technical reasons: We don't currently keep track of the last message
+    # sent to a Person, and if they messaged the bot before writing an intro
+    # but after receiving a message asking for availability, we wouldn't know
+    # if they're responding with a intro or some other query. But also for UX
+    # reasons: it seems reasonable that someone who didn't respond to the
+    # bot's initial query is not interested enough to participate.
+    people = Person.objects.filter(pools=round.pool).exclude(intro="")
     # initially set everyone's availability to unknown
     people.update(available=None)
     for person in people:
-        # if this person has left this pool, update the database to reflect 
+        # if this person has left this pool, update the database to reflect
         # this and don't send them a request for availability
         if person.user_id not in channel_members:
             person.pools.remove(round.pool)
@@ -96,7 +144,7 @@ def ask_availability(round):
         blocks = messages.format_block_text(
             "ASK_IF_AVAILABLE", 
             person.id,
-            { "person": person }
+            {"person": person}
         )
         send_dm(person.user_id, blocks=blocks)
     for user_id in channel_members:
@@ -105,23 +153,34 @@ def ask_availability(round):
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
         except Person.DoesNotExist:
+            # get the user's Slack profile
+            # https://api.slack.com/methods/users.info
             user = client.users_info(user=user_id)
-            Person(user_id=user_id, 
-                username=user["user"]["name"], 
-                given_name=user["user"]["profile"]["first_name"],
-                surname=user["user"]["profile"]["last_name"])
+            try:
+                # keys on "profile" are not guaranteed to exist
+                full_name = user["user"]["profile"]["real_name"]
+            except KeyError:
+                send_dm(user_id, messages.PERSON_MISSING_NAME)
+                logger.warning(f"Slack \"real_name\" field missing for user: {user_id}")
+                continue
+            person = Person(user_id=user_id, user_name=user["user"]["name"],
+                full_name=full_name,
+                casual_name=Person.get_first_name(full_name))
             person.save()
-            person.pools.add(obj)
+            person.pools.add(round.pool)
             logger.info(f"Added {person} to pool \"{round.pool}\".")
             send_dm(user_id, 
-                text=messages.WELCOME_INTRO_1.format({ "person": person }))
-            send_dm(user_id, text=messages.WELCOME_INTRO_2)
+                text=messages.WELCOME_INTRO.format(person=person,
+                    pool=round.pool))
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 
 def send_matching_message(recipient, match):
+    """notify the two people in a Match that they've been paired with
+    instructions to message each other to meet up
+    """
     send_dm(recipient.user_id, 
-        text=messages.MATCH_1.format({ "recipient": recipient, "match": match }))
+        text=messages.MATCH_1.format(recipient=recipient, match=match))
     send_dm(recipient.user_id, 
-        text=messages.MATCH_2.format({ "match": match }))
+        text=messages.MATCH_2.format(match=match))
     logger.info(f"Sent matching messages for match: {match}.")
