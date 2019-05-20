@@ -14,6 +14,8 @@
 - Pip 3
 - [Google Cloud SDK](https://cloud.google.com/sdk/)
 
+### Instructions
+
 1. create a virtualenv folder: `mkdir meetups`
 2. install the virtualenv: `python3 -m venv meetups`
 3. `cd meetups`, `source bin/activate`
@@ -57,7 +59,7 @@ handlers:
   script: auto
 ```
 
-### Useful links
+### References for development
 
 - https://medium.com/@BennettGarner/deploying-a-django-application-to-google-app-engine-f9c91a30bd35
 - https://cloud.google.com/sdk/docs/downloads-interactive
