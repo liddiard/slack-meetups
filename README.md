@@ -67,7 +67,7 @@ Once you click the "Save" button, everyone in the pool (that is, everyone in the
 
 ![ask for introduction](screenshots/ask_for_introduction.png)
 
-Once they've provided their intro, they're automatically marked as available for their first round. If they never respond with an intro, they'll still appear in the admin interface under "People", but they won't be matched or messaged asking if they're available.
+Once they've provided their intro, they're automatically marked as available for their first round. If they never respond with an intro, they'll still appear in the admin interface under "People", but they won't be matched or messaged asking if they're available:
 
 ![people list](screenshots/people_list.png)
 
@@ -141,8 +141,8 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 runtime: python37
 
 env_variables:
-  ADMIN_SLACK_USER_ID: "[ADMIN_SLACK_USER_ID]"
   SECRET_KEY: "[SECRET_KEY]"
+  ADMIN_SLACK_USER_ID: "[ADMIN_SLACK_USER_ID]"
   SLACK_API_TOKEN: "[SLACK_API_TOKEN]"
   SLACK_SIGNING_SECRET: "[SLACK_SIGNING_SECRET]"
   DB_HOST: "/cloudsql/slack-meetups:us-west2:slack-meetups-01"
