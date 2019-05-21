@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -126,6 +127,27 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 STATIC_ROOT = "static"
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout
+        }
+    },
+    "loggers": {
+        "": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True
+        },
+    },
+}
+
 
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
 SLACK_API_TOKEN = os.getenv("SLACK_API_TOKEN")
