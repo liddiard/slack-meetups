@@ -2,6 +2,8 @@ import random
 import logging
 
 from django.contrib import admin
+from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 
 from .models import Pool, Person, Round, Match
 from .utils import group
@@ -66,6 +68,12 @@ class MatchAdmin(admin.ModelAdmin):
     get_round_start_date.short_description = "Round start date"
 
 
+# readd the built-in "authentication and authorization" models to our custom
+# admin site
+admin.site.register(User)
+admin.site.register(Group)
+
+
 def match(round):
     """make random pairings for all participants who've opted in (responded
     saying they're available) for the current round. this function will also
@@ -91,9 +99,9 @@ def match(round):
         if not excludable_people:
             raise Exception("There are an odd number of people to match this "
                 "round, which means somone must be excluded. However, no one "
-                "in this pool is marked as a person who can be excluded. "
-                "Please select at least one person from this pool who can be "
-                "excluded.")
+                "in this pool is marked as available and as a person who can "
+                "be excluded. Please ensure at least one person from this "
+                "pool is both available and can be excluded.")
         person_to_exclude = random.choice(excludable_people)
         people_to_match = people_to_match.exclude(id=person_to_exclude.id)
         logger.info(f"Odd number of people ({len(people_to_match)}) for round "

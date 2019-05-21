@@ -23,8 +23,13 @@ class Pool(models.Model):
     other
     """
     name = models.CharField(max_length=64, unique=True)
+    name.help_text = "A human-readable name for this pool, like “2020 "\
+        "interns”"
     channel_id = models.CharField(max_length=9, unique=True)
+    name.help_text = "Slack channel ID. You can get this from the URL for "\
+        "the Slack channel when loaded in a web browser."
     channel_name = models.CharField(max_length=21)
+    channel_name.help_text = "Name of the Slack channel, like “#interns-2020”"
 
     def __str__(self):
         return self.name
@@ -33,13 +38,17 @@ class Person(models.Model):
     """corresponds to a Slack user; a single individual
     """
     user_id = models.CharField(max_length=9, unique=True, db_index=True)
+    user_id.help_text = "Slack user ID"
     # Slack user "names" are kind of confusing, may be disappearing, are not
     # guaranteed to be unique... and should we even be storing this? It's 
     # still useful though for organizations where `user_name`s correspond to
     # corp IDs/emails. See:
     # https://api.slack.com/changelog/2017-09-the-one-about-usernames
     user_name = models.CharField(max_length=32)
+    user_id.help_text = "Slack user name. Note: Slack “user names” are not "\
+        "like traditional usernames and may not be unique."
     full_name = models.CharField(max_length=128)
+    full_name.help_text = "Person’s full name"
     # `casual_name` _usually_ corresponds to first name and should _usually_ 
     # be analogous to given name. More generally, it's how you'd say, "Hey
     # {casual_name}, nice to meet you!" In an effort to make fewer assumptions
@@ -47,11 +56,27 @@ class Person(models.Model):
     # separate, editable field.
     # https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/
     casual_name = models.CharField(max_length=64)
+    casual_name.help_text = "How you would refer to this person in the "\
+        "sentence: “Hey {casual_name}, nice to meet you!” Often synonymous "\
+        "with “given name.”"
     intro = models.TextField(blank=True)
+    intro.help_text = "Introduction that appears to other people when this "\
+        "person is matched with them."
     available = models.BooleanField(null=True) # `null` corresponds to unknown
+    available.help_text = "Whether or not this person is available for "\
+        "and interested in being matched."
     can_be_excluded = models.BooleanField(default=False)
+    can_be_excluded.help_text = "Whether or not, in the event of an odd "\
+        "number of available people in a matching pool, this person could "\
+        "be excluded. Every pool needs at least one available person who "\
+        "can be excluded."
     pools = models.ManyToManyField(Pool, blank=True)
+    pools.help_text = "Matching pools of which this person is a member. "\
+        "This is automatically updated based on Slack channel membership "\
+        "whenever a round is started in a particular pool."
     joined = models.DateTimeField(auto_now_add=True)
+    joined.help_text = "When this person was first picked up by the bot, "\
+        "usually the creation time of the first round in a pool they joined."
 
     class Meta:
         verbose_name_plural = "people"
@@ -85,8 +110,8 @@ class Round(models.Model):
     def __str__(self):
         # example: "Monday, Jan 9, 2019"
         date_format = "%A, %b %-d, %Y"
-        return f"{self.pool}: {self.start_date.strftime(date_format)} – "
-            f"{self.end_date.strftime(date_format)}"
+        return (f"{self.pool}: {self.start_date.strftime(date_format)} – "
+            f"{self.end_date.strftime(date_format)}")
 
 class Match(models.Model):
     """a pairing between two People in a Round to meet each other
@@ -98,6 +123,7 @@ class Match(models.Model):
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
     # whether or not this pair actually met
     met = models.BooleanField(null=True) # `null` corresponds to unknown
+    met.help_text = "Whether or not this pair actually met up"
 
     class Meta:
         verbose_name_plural = "matches"
