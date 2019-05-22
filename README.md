@@ -87,7 +87,7 @@ You can see who was matched by going to the admin interface, and under "Matcher"
 
 ### Find out who met up
 
-That's it for now! When the current round is over and you're ready to start a new round, follow the same instructions above under "Start a round of matching". The bot will still solicit everyone's availability, and this time after they RSVP, the bot will check if this person met with someone before and whether or not they met is unknown. If that's is the case, it will send a follow-up message asking if they met up with their previous match. Here's what that looks like:
+When the current round is over and you're ready to start a new one, follow the same instructions above under "Start a round of matching". The bot will still solicit everyone's availability, but this time after each user RSVPs, the bot will check if this person met with someone before. If so, it will send a follow-up message asking if they met up with their previous match. Here's what that looks like:
 
 ![ask if met](screenshots/ask_if_met.png)
 
