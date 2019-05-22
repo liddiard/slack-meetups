@@ -1,6 +1,7 @@
 db.sqlite3
 .DS_Store
 ngrok
+cloud_sql_proxy
 *.pyc
 matcher/migrations/
 app.yaml
