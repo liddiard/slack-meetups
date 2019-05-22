@@ -1,4 +1,4 @@
-# ![bot logo thumbnail](graphics/bot_logo_thumb.png) meetups
+# ![bot logo thumbnail](graphics/bot_logo_thumb.png | width=56) Meetups
 
 A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet new, interesting people in your company, club, or group!
 
