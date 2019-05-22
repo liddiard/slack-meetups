@@ -11,6 +11,12 @@ A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet n
 
 It supports variable frequency and length for rounds of matching, multiple matching "pools", and has an admin interface to manage membership, pools, and matching rounds.
 
+## Tech stack
+
+- Django running on Python 3.7+
+- Postgres on Google Cloud SQL (via proxy for local development)
+- Slack Python SDK
+
 ## User guide for admins
 
 *Note: This section assumes an already-configured and deployed server. For deployment instructions, [see below](#deployment-instructions).*
@@ -103,12 +109,6 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 - The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message, with a mention to contact the bot's admin, if configured. Having the bot respond to other queries would require some refactoring as it would have to keep track of the last message sent to each user.
 - Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job.
 - On the admin side, there's not a ton of input validation. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these things.
-
-## Tech stack
-
-- Django running on Python 3.7+
-- Postgres on Google Cloud SQL (via proxy for local development)
-- Slack Python SDK
 
 ## Development setup
 
