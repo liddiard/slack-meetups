@@ -2,7 +2,7 @@
 
 A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet new, interesting people in your company, club, or group!
 
-## Features:
+## Features
 
 - 💬 Requests a custom introduction for each person
 - ❓ Asks availability each round for everyone in the matching pool
