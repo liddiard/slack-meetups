@@ -153,8 +153,8 @@ def update_availability(payload, action, block_id):
 def ask_if_met(user_id):
     # ask this person if they met up with their last match (if any)
     # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (Match.objects.filter(person_1__user_id=user_id) | 
-        Match.objects.filter(person_2__user_id=user_id))
+    user_matches = (Match.objects.filter(person_1__user_id=user_id) |
+                    Match.objects.filter(person_2__user_id=user_id))
     if not user_matches:
         # if the Person hasn't matched with anyone yet, skip sending this 
         # message
@@ -173,6 +173,7 @@ def ask_if_met(user_id):
              "start_date": latest_match.round.start_date.strftime(date_format)}
         )
         send_dm(user_id, blocks=blocks)
+    return HttpResponse(204)
 
 
 def update_met(payload, action, block_id):
@@ -188,11 +189,11 @@ def update_met(payload, action, block_id):
     try:
         user_id = payload["user"]["id"]
     except KeyError:
-        return JsonResponse(status=400, 
-            data={"error": "request payload is missing user ID"}) 
+        return JsonResponse(status=400,
+            data={"error": "request payload is missing user ID"})
     # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (Match.objects.filter(person_1__user_id=user_id) | 
-        Match.objects.filter(person_2__user_id=user_id))
+    user_matches = (Match.objects.filter(person_1__user_id=user_id) |
+                    Match.objects.filter(person_2__user_id=user_id))
     try:
         match = user_matches.get(id=block_id)
     except Match.DoesNotExist:

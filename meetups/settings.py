@@ -140,7 +140,7 @@ LOGGING = {
         }
     },
     "loggers": {
-        "": {
+        "": { # empty string is the default logger config
             "handlers": ["console"],
             "level": "INFO",
             "propagate": True

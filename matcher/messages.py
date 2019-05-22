@@ -44,7 +44,7 @@ BLOCKS = {
                     "style": "primary",
                     "text": {
                         "type": "plain_text",
-                        "text": "Yes, we met!"
+                        "text": "Yes, we met"
                     },
                     "value": "yes"
                 },

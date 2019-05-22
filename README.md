@@ -1,17 +1,17 @@
 # meetups
 
-Randomly pair people in a Slack channel for 1:1 meetups. Meet new, interesting people in your company, club, or group!
+A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet new, interesting people in your company, club, or group!
 
-This Slack bot:
+## Features:
 
-- Requests a custom introduction for each person
-- Asks availability each round for everyone in the matching pool
-- Randomly pairs people to meet via direct message
-- Collects feedback on who actually met up
+- 💬 Requests a custom introduction for each person
+- ❓ Asks availability each round for everyone in the matching pool
+- 🎲 Randomly pairs people to meet via direct message
+- 🤝 Collects feedback on who actually met up
 
 It supports variable frequency and length for rounds of matching, multiple matching "pools", and has an admin interface to manage membership, pools, and matching rounds.
 
-## User guide (for admins)
+## User guide for admins
 
 *Note: This section assumes an already-configured and deployed server. For deployment instructions, [see below](#deployment-instructions).*
 
@@ -63,11 +63,13 @@ Select a pool and a start and end date. A week is usually good – start on a M
 
 ![create round](screenshots/create_round.png)
 
-Once you click the "Save" button, everyone in the pool (that is, everyone in the pool's Slack channel) will get a direct message. If they're a first-time user, they'll be asked for an introduction about themselves. Here's how that interaction looks:
+Click the "Save" button. When you do so, everyone in the pool (that is, everyone in the pool's Slack channel) will get a direct message. If they're a first-time user, they'll be asked for an introduction about themselves. Here's how that interaction looks:
 
 ![ask for introduction](screenshots/ask_for_introduction.png)
 
-Once they've provided their intro, they're automatically marked as available for their first round. If they never respond with an intro, they'll still appear in the admin interface under "People", but they won't be matched or messaged asking if they're available:
+Once they've provided their intro, they're automatically marked as available for their first round. If they never respond with an intro, they'll still appear in the admin interface under "People", but they won't be matched or messaged asking if they're available.
+
+Here's the "People" admin list page:
 
 ![people list](screenshots/people_list.png)
 
@@ -95,11 +97,12 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 
 ## Known limitations
 
-- The bot doesn't really handle cases where a person is a member of multiple pools. It will work, but they can't have separate intro text or availability statuses per pool. 
+- The bot's message content is a bit specific in places and may not match your use case. Luckily, all content is stored within `matcher/messages.py` so it's fairly easy to customize if you want to fork the repo.
+- The bot doesn't do much to handle cases where a person is a member of multiple pools. It will work, but people can't have separate intro text or availability statuses per pool. 
 - The bot will only ask about a person's most recent match when asking if they met up, so overlapping rounds with the same person, either in the same pool or among multiple pools, may not give you as much data about who met up.
-- The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message, with a mention to contact the bot's admin, if configured. Having the bot respond to other queries would require some refactoring as we'd have to keep track of the last message sent to each user.
-- Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up custom django admin commands and calling them from a cron job.
-- On the admin side, there's not a ton of input validation. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen.
+- The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message, with a mention to contact the bot's admin, if configured. Having the bot respond to other queries would require some refactoring as it would have to keep track of the last message sent to each user.
+- Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job.
+- On the admin side, there's not a ton of input validation. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built in user groups, you can restrict admin user's ability to edit these things.
 
 ## Tech stack
 
@@ -118,7 +121,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 ### Instructions
 
 1. create a virtualenv folder: `mkdir meetups`
-2. install the virtualenv: `python3 -m venv meetups`
+2. [install the virtualenv](https://docs.python.org/3/library/venv.html): `python3 -m venv meetups`
 3. `cd meetups`, `source bin/activate`
 4. clone repo into the virtualenv
 5. `cd [repo]`
@@ -127,11 +130,11 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 
 ## Deployment instructions
 
-1. create a Google Cloud Postgres instance
+1. [create a Google Cloud Postgres instance](https://cloud.google.com/sql/docs/postgres/create-instance)
 2. from the Google Cloud Shell Postgres console, connect to the DB and run `CREATE DATABASE meetups`
 3. configure `app.yaml` at root of repo (see example below)
 4. run `SECRET_KEY='development' python manage.py collectstatic`
-5. download Google Cloud SQL proxy and run it locally (replacing instance name as necesary): `./cloud_sql_proxy -instances="slack-meetups:us-west2:slack-meetups-01=tcp:3306"`
+5. download [Google Cloud SQL proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) and run it locally (replacing instance name as necesary): `./cloud_sql_proxy -instances="slack-meetups:us-west2:slack-meetups-01=tcp:3306"`
 6. while connected to the DB via proxy, run `python manage.py migrate` and `python manage.py createsuperuser`
 7. run `gcloud app deploy`
 
@@ -181,4 +184,4 @@ MVP requirements done!
 - automatic reporting of stats
 - analytics graphs
 - can we determine when a person joined Slack and use that info somehow?
-- unit tests? maybe? 😬
+- unit tests? maybe? 🙃

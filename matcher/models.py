@@ -26,8 +26,8 @@ class Pool(models.Model):
     name.help_text = "A human-readable name for this pool, like “2020 "\
         "interns”"
     channel_id = models.CharField(max_length=9, unique=True)
-    name.help_text = "Slack channel ID. You can get this from the URL for "\
-        "the Slack channel when loaded in a web browser."
+    channel_id.help_text = "Slack channel ID. You can get this from the URL "\
+        "for the Slack channel when loaded in a web browser."
     channel_name = models.CharField(max_length=21)
     channel_name.help_text = "Name of the Slack channel, like “#interns-2020”"
 
@@ -40,19 +40,19 @@ class Person(models.Model):
     user_id = models.CharField(max_length=9, unique=True, db_index=True)
     user_id.help_text = "Slack user ID"
     # Slack user "names" are kind of confusing, may be disappearing, are not
-    # guaranteed to be unique... and should we even be storing this? It's 
+    # guaranteed to be unique... and should we even be storing this? It's
     # still useful though for organizations where `user_name`s correspond to
     # corp IDs/emails. See:
     # https://api.slack.com/changelog/2017-09-the-one-about-usernames
     user_name = models.CharField(max_length=32)
-    user_id.help_text = "Slack user name. Note: Slack “user names” are not "\
-        "like traditional usernames and may not be unique."
+    user_name.help_text = "Slack user name. Note: Slack “user names” are "\
+        "not like traditional usernames and may not be unique."
     full_name = models.CharField(max_length=128)
     full_name.help_text = "Person’s full name"
-    # `casual_name` _usually_ corresponds to first name and should _usually_ 
+    # `casual_name` _usually_ corresponds to first name and should _usually_
     # be analogous to given name. More generally, it's how you'd say, "Hey
     # {casual_name}, nice to meet you!" In an effort to make fewer assumptions
-    # about names (especially names as entered on Slack), store this as a 
+    # about names (especially names as entered on Slack), store this as a
     # separate, editable field.
     # https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/
     casual_name = models.CharField(max_length=64)
@@ -84,9 +84,9 @@ class Person(models.Model):
     @staticmethod
     def get_first_name(full_name):
         # Get the first part of a Person's full name. If the person only has
-        # one name on Slack, it will return their full name. 
-        # N.B. This function is used in the context of getting a user's given 
-        # name, and this heuristic does not hold in places like China where 
+        # one name on Slack, it will return their full name.
+        # N.B. This function is used in the context of getting a user's given
+        # name, and this heuristic does not hold in places like China where
         # surname is first.
         return full_name.strip().split(" ")[0]
 

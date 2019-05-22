@@ -19,17 +19,17 @@ class MatcherAdmin(admin.AdminSite):
     site_url = None
 
 
-AdminSite = MatcherAdmin()
-admin.site = AdminSite # register our custom admin site with Django
+ADMIN_SITE = MatcherAdmin()
+admin.site = ADMIN_SITE # register our custom admin site with Django
 
 
-@admin.register(Pool, site=AdminSite)
+@admin.register(Pool, site=ADMIN_SITE)
 class PoolAdmin(admin.ModelAdmin):
     list_display = ("name", "channel_name")
     search_fields = ("name", "channel_name")
 
 
-@admin.register(Person, site=AdminSite)
+@admin.register(Person, site=ADMIN_SITE)
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("user_name", "full_name", "joined", "available")
     list_filter = ("available", "pools")
@@ -37,7 +37,7 @@ class PersonAdmin(admin.ModelAdmin):
     search_fields = ("user_name", "full_name", "casual_name")
 
 
-@admin.register(Round, site=AdminSite)
+@admin.register(Round, site=ADMIN_SITE)
 class RoundAdmin(admin.ModelAdmin):
     list_display = ("pool", "start_date", "end_date")
     list_filter = ("pool",)
@@ -50,7 +50,7 @@ class RoundAdmin(admin.ModelAdmin):
         return super().response_change(request, round)
 
 
-@admin.register(Match, site=AdminSite)
+@admin.register(Match, site=ADMIN_SITE)
 class MatchAdmin(admin.ModelAdmin):
     list_display = ("person_1", "person_2", "get_round_pool",
         "get_round_start_date", "met")
