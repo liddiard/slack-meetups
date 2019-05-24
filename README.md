@@ -1,4 +1,4 @@
-# <img src="https://github.com/liddiard/slack-meetups/blob/master/graphics/bot_logo_thumb.png?raw=true" width="56" alt="bot logo thumbnail" /> Meetups
+# <img src="https://github.com/liddiard/slack-meetups/blob/master/graphics/bot_logo_thumb.png?raw=true" width="56" alt="bot logo thumbnail" /> Slack Meetups
 
 A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet new, interesting people in your company, club, or group!
 
@@ -185,3 +185,5 @@ MVP requirements done!
 - analytics graphs
 - can we determine when a person joined Slack and use that info somehow?
 - unit tests? maybe? 🙃
+
+_This Slack bot is in no way endorsed by or affiliated with Slack Technologies or their product, Slack._
