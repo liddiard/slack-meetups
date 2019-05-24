@@ -138,7 +138,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 6. while connected to the DB via proxy, run `python manage.py migrate` and `python manage.py createsuperuser`
 7. run `gcloud app deploy`
 
-### Example YAML config:
+### Example `app.yaml` config:
 
 ```yaml
 runtime: python37
