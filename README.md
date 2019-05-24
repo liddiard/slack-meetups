@@ -51,7 +51,7 @@ Under the "Matcher" list to the right of "Pools", click the "Add" button. Fill o
 
 ![slack channel ID](screenshots/slack_channel_id.png)
 
-Example: The Slack channel ID is the highlighted part of the URL.
+_Example: The Slack channel ID is the highlighted part of the URL._
 
 Finally, click "Save". Your pool is created!
 
