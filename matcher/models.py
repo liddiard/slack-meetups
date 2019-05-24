@@ -144,12 +144,7 @@ def ask_availability(round):
     the upcoming round, adding and removing Pool members based on the current
     Slack channel membership
     """
-    channel_info = client.channels_info(channel=round.pool.channel_id)
-    # TODO: accessing channel members this way will be deprecated in the
-    # future. We will need to use conversations.members instead:
-    # https://api.slack.com/methods/conversations.members
-    # see: https://api.slack.com/changelog/2017-10-members-array-truncating
-    channel_members = channel_info["channel"]["members"]
+    channel_members = get_channel_members(round.pool.channel_id)
     # Get the People in the DB for this Pool, excluding anyone who hasn't
     # written an intro yet. We're considering them excluded, partially for
     # technical reasons: We don't currently keep track of the last message
@@ -201,6 +196,22 @@ def ask_availability(round):
                 text=messages.WELCOME_INTRO.format(person=person,
                     pool=round.pool))
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
+
+
+def get_channel_members(channel_id, limit=200):
+    """get members from a Slack channel, using pagination as necessary
+    https://api.slack.com/methods/conversations.members
+    """
+    members = []
+    cursor = ""
+    while True:
+        response = client.conversations_members(channel=channel_id,
+            cursor=cursor, limit=limit)
+        members += response.get("members", [])
+        cursor = response.get("response_metadata", {}).get("next_cursor")
+        if not cursor:
+            break
+    return members
 
 
 def send_matching_message(recipient, match):
