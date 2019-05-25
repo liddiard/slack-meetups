@@ -1,4 +1,4 @@
-# <img src="https://github.com/liddiard/slack-meetups/blob/master/graphics/bot_logo_thumb.png?raw=true" width="56" alt="bot logo thumbnail" /> Meetups
+# <img src="https://github.com/liddiard/slack-meetups/blob/master/graphics/bot_logo_thumb.png?raw=true" width="56" alt="bot logo thumbnail" /> Slack Meetups
 
 A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet new, interesting people in your company, club, or group!
 
@@ -51,7 +51,7 @@ Under the "Matcher" list to the right of "Pools", click the "Add" button. Fill o
 
 ![slack channel ID](screenshots/slack_channel_id.png)
 
-Example: The Slack channel ID is the highlighted part of the URL.
+_Example: The Slack channel ID is the highlighted part of the URL._
 
 Finally, click "Save". Your pool is created!
 
@@ -138,7 +138,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 6. while connected to the DB via proxy, run `python manage.py migrate` and `python manage.py createsuperuser`
 7. run `gcloud app deploy`
 
-### Example YAML config:
+### Example `app.yaml` config:
 
 ```yaml
 runtime: python37
@@ -185,3 +185,5 @@ MVP requirements done!
 - analytics graphs
 - can we determine when a person joined Slack and use that info somehow?
 - unit tests? maybe? 🙃
+
+_This Slack bot is in no way endorsed by or affiliated with Slack Technologies or their product, Slack._
