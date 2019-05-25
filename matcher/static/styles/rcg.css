@@ -1,0 +1,86 @@
+@font-face {
+    font-family: 'pp-sans-small-regular';
+    src: url('/static/fonts/PayPalSansSmall-Regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'pp-sans-big-light';
+    src: url('/static/fonts/PayPalSansBig-Light.woff2') format('woff2');
+}
+
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+:root {
+    --accessible-blue: #0070ba;
+    --accessible-blue-hover: #005ea6;
+    --color-grey-200: #eaeced;
+    --color-grey-700: #2c2e2f;
+}
+
+body {
+    background-color: #f5f7fa;
+    margin: 0;
+    font-family: 'pp-sans-small-regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: var(--color-grey-700);
+}
+
+main {
+    margin: 0 auto;
+    max-width: 640px;
+    line-height: 1.4;
+    font-size: 1.2em;
+    padding: 2em;
+    margin-bottom: 2em;
+    background-color: white;
+}
+
+a {
+    color: var(--accessible-blue);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accessible-blue-hover);
+}
+
+a.button {
+    display: inline-block;
+    margin: 0 auto;
+    background-color: var(--accessible-blue);
+    color: white;
+    padding: 1em 2em;
+    border-radius: 0.5em;
+}
+
+a.button:hover {
+    background-color: var(--accessible-blue-hover);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'pp-sans-big-light', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+}
+
+img.inline {
+    display: block;
+    max-width: 100%;
+    border: 1px solid var(--color-grey-200);
+    margin: 1em 0;
+}
+
+img.calendar {
+    border: none;
+    margin-left: -2em;
+    max-width: calc(100% + 4em);
+}
+
+header .logo {
+    display: block;
+    margin: 0 auto;
+}
+
+.actions {
+    text-align: center;
+}

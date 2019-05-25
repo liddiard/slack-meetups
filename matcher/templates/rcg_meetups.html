@@ -1,0 +1,54 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>RCG Meetups</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Get to know RCGs across the company." />
+        <link rel="stylesheet" href="{% static 'styles/rcg.css' %}" />
+    </head>
+    <body>
+        <main>
+            <header>
+                <img src="{% static 'images/rcg_meetups_logo.svg' %}" alt="RCG Meetups logo" class="logo">
+            </header>
+
+            <p><strong>RCG Meetups</strong> is an unofficial RCG program to help you get to know other recent college grads through casual 1:1 meetups.</p>
+            <p>Pairings happen every other week – you can opt in or out based on your availability. Participants are also invited to monthly group reunions with everyone in the program.</p>
+            <p>Meet new friends, grow your network, and form meaningful connections with interesting RCGs from across the company.</p>
+            <p>Join <a href="https://paypal.slack.com/messages/CK07PD945/" target="_blank">#rcg-meetups</a> to participate!</p>
+
+            <div class="actions">
+                <a href="https://paypal.slack.com/messages/CK07PD945/" target="_blank" class="button">Join #rcg-meetups</a>
+            </div>
+
+            <h2>How does the program work?</h2>
+            <p>After joining the Slack channel, you’ll receive a message at the start of the next pairing round asking for an introduction. Once you introduce yourself, you’ll receive your first pairing:</p>
+            <img src="{% static 'images/first_interaction.png' %}" alt="First interaction with RCG Meetups bot – welcome, introduction, and match" class="inline" />
+            <img src="{% static 'images/message_match.png' %}" alt="Messaging the person you matched with" class="inline" />
+            <p>Pairing rounds happen on the first and third Monday of each month.</p>
+            <p>For following rounds, you’ll be asked if you want to meet someone new that week. If you reply “yes,” you’ll be paired for that round. If reply “no” or don’t reply, you’ll be skipped for that round.</p>
+            <img src="{% static 'images/ask_availability.png' %}" alt="RCG Meetups bot asking if you want to participat in the next round" class="inline" style="padding: 0.5em" />
+            <p>If at any point you want to leave the program, simply leave the Slack channel.</p>
+            <p>Program participants also receive invites to group reunions during the last week of each month. These meetups are great way to keep in touch with RCGs you’ve met before and to meet more new people.</p>
+
+            <h2>Example schedule for a month</h2>
+            <img src="{% static 'images/month_calendar_matching_schedule.png' %}" alt="Example matching schedule for a month" class="inline calendar" />
+
+            <h2>Goal</h2>
+            <p>The goal of RCG Meetups is to to help you make new friends and grow your network at PayPal.</p>
+            <p>It can be hard to meet other recent college grads between RCG Program events. Participating in RCG Meetups gives you more familiar faces the next time you’re at an RCG gathering.</p>
+            <p>1:1 meetups also help you gain insight into different parts of the company. And who knows, you might find someone you have a lot in common with who you wouldn’t have met otherwise.</p>
+            <p>Participate by joining the channel!</p>
+
+            <div class="actions">
+                <a href="https://paypal.slack.com/messages/CK07PD945/" target="_blank" class="button">Join #rcg-meetups</a>
+            </div>
+
+            <h2>Questions?</h2>
+            <p>Feel free to ask questions in the <a href="https://paypal.slack.com/messages/CK07PD945/" target="_blank">#rcg-meetups</a> Slack channel.</p>
+        </main>
+    </body>
+</html>

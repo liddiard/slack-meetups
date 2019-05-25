@@ -31,6 +31,7 @@ else:
     DEBUG = False
 
 ALLOWED_HOSTS = [
+    "localhost",
     "slack-meetups.appspot.com"
 ]
 

@@ -5,4 +5,4 @@ cloud_sql_proxy
 *.pyc
 matcher/migrations/
 app.yaml
-static/
+/static/
