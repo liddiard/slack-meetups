@@ -48,7 +48,7 @@ class PoolAdmin(admin.ModelAdmin):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("user_name", "full_name", "joined", "available",
         "has_intro")
-    list_filter = ("available", "pools", IntroListFilter)
+    list_filter = (IntroListFilter, "available", "pools")
     ordering = ("-joined",)
     search_fields = ("user_name", "full_name", "casual_name")
 
