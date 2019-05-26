@@ -24,5 +24,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('slack/action/', views.handle_slack_action),
     path('slack/message/', views.handle_slack_message),
-    path('rcg-meetups/', TemplateView.as_view(template_name='rcg_meetups.html'))
+    path('rcg/', TemplateView.as_view(template_name='rcg_meetups.html'))
 ]
