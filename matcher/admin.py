@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class IntroListFilter(admin.SimpleListFilter):
-    title = "Has intro"
+    title = "has intro"
     parameter_name = "has_intro"
 
     def lookups(self, request, model_admin):
