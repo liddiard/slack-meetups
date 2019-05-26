@@ -15,14 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 from matcher import views
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('slack/action/', views.handle_slack_action),
-    path('slack/message/', views.handle_slack_message),
-    path('rcg/', TemplateView.as_view(template_name='rcg_meetups.html'))
+    path("admin/", admin.site.urls, name="admin"),
+    path("slack/action/", views.handle_slack_action, name="slack_action"),
+    path("slack/message/", views.handle_slack_message, name="slack_message"),
+    path("rcg/", TemplateView.as_view(template_name="rcg_meetups.html"),
+        name="rcg_meetups"),
+    path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
 ]
