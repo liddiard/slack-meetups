@@ -12,6 +12,21 @@ from .utils import group
 logger = logging.getLogger(__name__)
 
 
+
+class IntroListFilter(admin.SimpleListFilter):
+    title = "Has intro"
+    parameter_name = "has_intro"
+
+    def lookups(self, request, model_admin):
+        return (("yes", "Yes"), ("no", "No"))
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.exclude(intro="")
+        if self.value() == "no":
+            return queryset.filter(intro="")
+
+
 class MatcherAdmin(admin.AdminSite):
     site_header = "Matching administration"
     site_title = "Matching admin"
@@ -31,8 +46,9 @@ class PoolAdmin(admin.ModelAdmin):
 
 @admin.register(Person, site=ADMIN_SITE)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ("user_name", "full_name", "joined", "available")
-    list_filter = ("available", "pools")
+    list_display = ("user_name", "full_name", "joined", "available",
+        "has_intro")
+    list_filter = ("available", "pools", IntroListFilter)
     ordering = ("-joined",)
     search_fields = ("user_name", "full_name", "casual_name")
 

@@ -83,12 +83,19 @@ class Person(models.Model):
 
     @staticmethod
     def get_first_name(full_name):
-        # Get the first part of a Person's full name. If the person only has
-        # one name on Slack, it will return their full name.
-        # N.B. This function is used in the context of getting a user's given
-        # name, and this heuristic does not hold in places like China where
-        # surname is first.
+        """"gets the first part of a Person's full name
+        """
+        # If the person only has one name on Slack, it will return their full
+        # name. N.B. This function is used in the context of getting a user's
+        # given name, and this heuristic does not hold in places like China
+        # where surname is first.
         return full_name.strip().split(" ")[0]
+
+    def has_intro(self):
+        """whether or not this person has an intro
+        """
+        return bool(self.intro)
+    has_intro.boolean = True
 
     def __str__(self):
         return f"{self.full_name} ({self.user_name})"
