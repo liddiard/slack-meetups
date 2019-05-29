@@ -173,6 +173,9 @@ handlers:
 - https://cloud.google.com/sql/docs/postgres/quickstart-proxy-test
 - https://cloud.google.com/sql/docs/postgres/connect-admin-ip
 
+Connect to Postgres instance through cloud proxy:
+`psql -p 3306 -h '127.0.0.1' -U meetups`
+
 ## TODO
 
 ### MVP
