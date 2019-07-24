@@ -134,7 +134,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 2. from the Google Cloud Shell Postgres console, connect to the DB and run `CREATE DATABASE meetups`
 3. configure `app.yaml` at root of repo (see example below)
 4. run `SECRET_KEY='development' python manage.py collectstatic`
-5. download [Google Cloud SQL proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) and run it locally (replacing instance name as necesary): `./cloud_sql_proxy -instances="slack-meetups:us-west2:slack-meetups-01=tcp:3306"`
+5. download [Google Cloud SQL proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) and run it locally (replacing instance name as necesary): `./cloud_sql_proxy -instances="slack-meetups:us-west2:slack-meetups-01=tcp:5432"`
 6. while connected to the DB via proxy, run `python manage.py migrate` and `python manage.py createsuperuser`
 7. run `gcloud app deploy`
 
