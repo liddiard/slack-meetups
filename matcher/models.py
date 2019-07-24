@@ -5,6 +5,7 @@ from django.db import models
 
 import matcher.messages as messages
 from .slack import client, send_dm
+from .constants import QUESTIONS
 
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,15 @@ class Person(models.Model):
     joined = models.DateTimeField(auto_now_add=True)
     joined.help_text = "When this person was first picked up by the bot, "\
         "usually the creation time of the first round in a pool they joined."
+    LAST_QUERY_CHOICES = [
+        (QUESTIONS["INTRO"], "INTRO"),
+        (QUESTIONS["MET"], "MET"),
+        (QUESTIONS["AVAILABILITY"], "AVAILABILITY")
+    ]
+    last_query = models.CharField(max_length=3, choices=LAST_QUERY_CHOICES,
+        blank=True)
+    last_query.help_text = "The last question the bot asked the user, so "\
+        "when they reply we know what question they responded to."
 
     class Meta:
         verbose_name_plural = "people"
@@ -170,12 +180,10 @@ def ask_availability(round):
             person.pools.remove(round.pool)
             logger.info(f"Removed {person} from pool \"{round.pool}\".")
             continue
-        blocks = messages.format_block_text(
-            "ASK_IF_AVAILABLE", 
-            person.id,
-            {"person": person}
-        )
-        send_dm(person.user_id, blocks=blocks)
+        send_dm(person.user_id,
+            text=messages.ASK_IF_AVAILABLE.format(person=person))
+        person.last_query = QUESTIONS["AVAILABILITY"]
+        person.save()
     for user_id in channel_members:
         try:
             Person.objects.get(user_id=user_id)
@@ -189,7 +197,7 @@ def ask_availability(round):
                 # keys on "profile" are not guaranteed to exist
                 full_name = user["user"]["profile"]["real_name"]
             except KeyError:
-                send_dm(user_id, messages.PERSON_MISSING_NAME)
+                send_dm(user_id, text=messages.PERSON_MISSING_NAME)
                 logger.warning("Slack \"real_name\" field missing for user: "
                     f"{user_id}")
                 continue
@@ -199,9 +207,10 @@ def ask_availability(round):
             person.save()
             person.pools.add(round.pool)
             logger.info(f"Added {person} to pool \"{round.pool}\".")
-            send_dm(user_id, 
-                text=messages.WELCOME_INTRO.format(person=person,
+            send_dm(user_id, text=messages.WELCOME_INTRO.format(person=person,
                     pool=round.pool))
+            person.last_query = QUESTIONS["INTRO"]
+            person.save()
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 

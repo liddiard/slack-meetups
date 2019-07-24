@@ -1,0 +1,16 @@
+{
+  "name": "rtmproxy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/rtm-api": "^5.0.1",
+    "superagent": "^5.1.0"
+  }
+}

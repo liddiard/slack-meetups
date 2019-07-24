@@ -22,7 +22,6 @@ from matcher import views
 
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
-    path("slack/action/", views.handle_slack_action, name="slack_action"),
     path("slack/message/", views.handle_slack_message, name="slack_message"),
     path("rcg/", TemplateView.as_view(template_name="rcg_meetups.html"),
         name="rcg_meetups"),

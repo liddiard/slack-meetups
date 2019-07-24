@@ -25,79 +25,8 @@ DID_NOT_MEET = "Thanks for the feedback! Hope you have a chance to meet next tim
 UNKNOWN_QUERY = "Sorry, I don’t know how to respond to most messages! 😬 If you have a question or feedback, you can contact my admin{contact_phrase}"
 INTRO_RECEIVED = "Thanks for the intro, {person.casual_name}! You’ll receive your first pairing at the start of the upcoming round."
 INTRO_RECEIVED_QUESTIONS = "If you have any questions in the meantime, feel free to ask <@{ADMIN_SLACK_USER_ID}>."
+UNSURE_YES_NO_ANSWER = "Sorry I’m not sure what you mean. Though I hope to gain sentience one day, sadly for now I am a dumb computer 🤖😭 Please respond with “yes” or “no”:"
 
-BLOCKS = {
-    "ASK_IF_MET": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Last time on {start_date}, you paired with {other_person.full_name} (<@{other_person.user_id}>). Did you have a chance to meet up with {other_person.casual_name}?"
-            }
-        },
-        {
-            "type": "actions",
-            "block_id": "met-{id}",
-            "elements": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Yes, we met"
-                    },
-                    "value": "yes"
-                },
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "No, we didn’t meet"
-                    },
-                    "value": "no"
-                }
-            ]
-        }
-    ],
-    "ASK_IF_AVAILABLE": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Hey {person.casual_name}, want to be paired to meet someone new this week?"
-            }
-        },
-        {
-            "type": "actions",
-            "block_id": "availability-{id}",
-            "elements": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Yes, I want to be paired!"
-                    },
-                    "value": "yes"
-                },
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Not this week, maybe later"
-                    },
-                    "value": "no"
-                }
-            ]
-        }
-    ]
-}
-
-def format_block_text(block_name, block_id, dictionary):
-    """Format a 2-element block where the first item is a text block and the
-    second item is an action block"""
-    # make a deep copy so we don't mutate the block template
-    block = copy.deepcopy(BLOCKS[block_name])
-    block[0]["text"]["text"] = block[0]["text"]["text"].format_map(dictionary)
-    block[1]["block_id"] = block[1]["block_id"].format(id=block_id)
-    return block
+# questions to user, see also constants.py -> QUESTIONS
+ASK_IF_MET = "Last time on {start_date}, you paired with {other_person.full_name} (<@{other_person.user_id}>). Did you have a chance to meet up with {other_person.casual_name}?"
+ASK_IF_AVAILABLE = "Hey {person.casual_name}, want to be paired to meet someone new this week?"

@@ -6,3 +6,4 @@ cloud_sql_proxy
 matcher/migrations/
 app.yaml
 /static/
+rtmProxy/node_modules/
