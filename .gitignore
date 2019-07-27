@@ -1,4 +1,5 @@
 db.sqlite3
+slack-meetups.db
 .DS_Store
 ngrok
 cloud_sql_proxy
