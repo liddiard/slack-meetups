@@ -14,7 +14,7 @@ It supports variable frequency and length for rounds of matching, multiple match
 ## Tech stack
 
 - Django running on Python 3.7+
-- Postgres on Google Cloud SQL (via proxy for local development)
+- SQLite 3 (you can change databases if you need something more robust, but it's not a particularly database-intensive application)
 - Slack Python SDK
 
 ## User guide for admins
@@ -110,15 +110,14 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 - Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job.
 - On the admin side, there's not a ton of input validation. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these things.
 
-## Development setup
+## Setup instructions
 
 ### Prerequisites
 
-- Python 3.7+
+- Python 3.7+ (the code uses F-strings which aren't available in earlier versions of Python 3)
 - Pip 3
-- [Google Cloud SDK](https://cloud.google.com/sdk/)
 
-### Instructions
+### Installation
 
 1. create a virtualenv folder: `mkdir meetups`
 2. [install the virtualenv](https://docs.python.org/3/library/venv.html): `python3 -m venv meetups`
@@ -126,55 +125,14 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 4. clone repo into the virtualenv
 5. `cd [repo]`
 6. `pip3 install -r requirements.txt`
-7. follow SQL proxy instructions under "deployment instructions" below for database setup
 
-## Deployment instructions
+### Configuring the server
 
-1. [create a Google Cloud Postgres instance](https://cloud.google.com/sql/docs/postgres/create-instance)
-2. from the Google Cloud Shell Postgres console, connect to the DB and run `CREATE DATABASE meetups`
-3. configure `app.yaml` at root of repo (see example below)
-4. run `SECRET_KEY='development' python manage.py collectstatic`
-5. download [Google Cloud SQL proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) and run it locally (replacing instance name as necesary): `./cloud_sql_proxy -instances="slack-meetups:us-west2:slack-meetups-01=tcp:5432"`
-6. while connected to the DB via proxy, run `python manage.py migrate` and `python manage.py createsuperuser`
-7. run `gcloud app deploy`
-
-### Example `app.yaml` config:
-
-```yaml
-runtime: python37
-
-env_variables:
-  SECRET_KEY: "[SECRET_KEY]"
-  ADMIN_SLACK_USER_ID: "[ADMIN_SLACK_USER_ID]"
-  SLACK_API_TOKEN: "[SLACK_API_TOKEN]"
-  SLACK_SIGNING_SECRET: "[SLACK_SIGNING_SECRET]"
-  DB_HOST: "/cloudsql/slack-meetups:us-west2:slack-meetups-01"
-  DB_PASSWORD: "[DB_PASSWORD]"
-
-beta_settings:
-  cloud_sql_instances: "slack-meetups-01"
-
-handlers: 
-- url: /static
-  static_dir: static/
-- url: /.*
-  secure: always
-  redirect_http_response_code: 301
-  script: auto
-```
-
-### References for development
-
-- https://medium.com/@BennettGarner/deploying-a-django-application-to-google-app-engine-f9c91a30bd35
-- https://cloud.google.com/sdk/docs/downloads-interactive
-- https://cloud.google.com/python/django/appengine
-- https://cloud.google.com/appengine/docs/standard/python3/config/appref
-- https://cloud.google.com/appengine/docs/standard/python3/runtime#environment_variables
-- https://cloud.google.com/sql/docs/postgres/quickstart-proxy-test
-- https://cloud.google.com/sql/docs/postgres/connect-admin-ip
-
-Connect to Postgres instance through cloud proxy:
-`psql -p 3306 -h '127.0.0.1' -U meetups`
+1. Create and set required environment variables in your environment: `SECRET_KEY` (required; a long random string for Django's cryptography), `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-"), `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who people should contact if they have questions)
+2. `python3 manage.py collectstatic` to move static files for serving
+3. `python3 manage.py migrate` to set up the database tables
+4. `python3 manage.py createsuperuser` to create your user to log in to the admin
+5. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups/wsgi.py`.
 
 ## TODO
 
