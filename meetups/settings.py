@@ -82,12 +82,8 @@ WSGI_APPLICATION = "meetups.wsgi.application"
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
-        "PORT": os.getenv("DB_PORT"), # default (5432) if none provided
-        "NAME": os.getenv("DB_NAME", "meetups"),
-        "USER": os.getenv("DB_USER", "meetups"),
-        "PASSWORD": os.getenv("DB_PASSWORD") # no password if none provided
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "slack-meetups"
     }
 }
 
