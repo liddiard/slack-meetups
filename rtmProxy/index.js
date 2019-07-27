@@ -3,7 +3,11 @@ const request = require('superagent'),
 
 // An access token (from your Slack app or custom integration - usually xoxb)
 const token = process.env.SLACK_API_TOKEN,
-  port = process.env.PORT || 8000;
+  host = process.env.HOST || "http://localhost:8000";
+
+if (!token) {
+  throw new Error('Missing environment variable for SLACK_API_TOKEN');
+}
 
 // The client is initialized and then started to get an active connection to the platform
 const rtm = new RTMClient(token);
@@ -11,7 +15,7 @@ rtm.start()
   .catch(console.error);
 
 rtm.on('ready', () => {
-  console.log('RTM proxy ready, forwarding requests to port', port);
+  console.log('RTM proxy ready, forwarding requests to:', host);
 });
 
 // After the connection is open, your app will start receiving other events.
@@ -25,7 +29,7 @@ rtm.on('message', async (event) => {
   console.log('message received from Slack:', event);
   let response;
   try {
-    response = await request.post(`http://localhost:${port}/slack/message/`)
+    response = await request.post(`${host}/slack/message/`)
       .send(event);
     console.log('response status received from server:', response.status);
   }
