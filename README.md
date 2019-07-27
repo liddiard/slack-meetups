@@ -129,10 +129,11 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 ### Configuring the server
 
 1. Create and set required environment variables in your environment: `SECRET_KEY` (required; a long random string for Django's cryptography), `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-"), `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who people should contact if they have questions)
-2. `python3 manage.py collectstatic` to move static files for serving
-3. `python3 manage.py migrate` to set up the database tables
-4. `python3 manage.py createsuperuser` to create your user to log in to the admin
-5. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups/wsgi.py`.
+2. `python manage.py collectstatic` to move static files for serving
+3. `python manage.py makemigrations` to set up migrations to create the database tables
+5. `python manage.py migrate` to create the database tables
+5. `python manage.py createsuperuser` to create your user to log in to the admin
+6. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups.wsgi`.
 
 ## TODO
 
