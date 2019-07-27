@@ -1,7 +1,7 @@
 """app constants"""
 
 QUESTIONS = {
-    "MET": "MET",
-    "AVAILABILITY": "AVL",
-    "INTRO": "BIO"
+    "met": "MET",
+    "availability": "AVL",
+    "intro": "BIO"
 }

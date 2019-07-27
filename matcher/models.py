@@ -79,12 +79,12 @@ class Person(models.Model):
     joined.help_text = "When this person was first picked up by the bot, "\
         "usually the creation time of the first round in a pool they joined."
     LAST_QUERY_CHOICES = [
-        (QUESTIONS["INTRO"], "INTRO"),
-        (QUESTIONS["MET"], "MET"),
-        (QUESTIONS["AVAILABILITY"], "AVAILABILITY")
+        (QUESTIONS["intro"], "intro"),
+        (QUESTIONS["met"], "met"),
+        (QUESTIONS["availability"], "availability")
     ]
     last_query = models.CharField(max_length=3, choices=LAST_QUERY_CHOICES,
-        blank=True)
+        null=True, blank=True)
     last_query.help_text = "The last question the bot asked the user, so "\
         "when they reply we know what question they responded to."
 
@@ -182,7 +182,7 @@ def ask_availability(round):
             continue
         send_dm(person.user_id,
             text=messages.ASK_IF_AVAILABLE.format(person=person))
-        person.last_query = QUESTIONS["AVAILABILITY"]
+        person.last_query = QUESTIONS["availability"]
         person.save()
     for user_id in channel_members:
         try:
@@ -209,7 +209,7 @@ def ask_availability(round):
             logger.info(f"Added {person} to pool \"{round.pool}\".")
             send_dm(user_id, text=messages.WELCOME_INTRO.format(person=person,
                     pool=round.pool))
-            person.last_query = QUESTIONS["INTRO"]
+            person.last_query = QUESTIONS["intro"]
             person.save()
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 

@@ -42,9 +42,9 @@ def handle_slack_message(request):
         return JsonResponse(status=404,
             data={"error": f"user with ID \"{user_id}\" not found"})
     message_map = {
-        QUESTIONS["INTRO"]: update_intro,
-        QUESTIONS["MET"]: update_met,
-        QUESTIONS["AVAILABILITY"]: update_availability
+        QUESTIONS["intro"]: update_intro,
+        QUESTIONS["met"]: update_met,
+        QUESTIONS["availability"]: update_availability
     }
     message = event.get("text")
     if not person.last_query:
@@ -90,9 +90,11 @@ def update_availability(event, person):
     """update a Person's availability based on their yes/no answer, and follow
     up asking if they met with their last Match, if any, and we don't know yet
     """
+    message_text = event.get("text", "")
     try:
-        available = determine_yes_no_answer(event.get("text", ""))
+        available = determine_yes_no_answer(message_text)
     except ValueError:
+        logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
     person.available = available
@@ -129,7 +131,7 @@ def ask_if_met(person):
         send_dm(person.user_id, text=messages.ASK_IF_MET.format(
             other_person=other_person, 
             start_date=latest_match.round.start_date.strftime(date_format)))
-        person.last_query = QUESTIONS["MET"]
+        person.last_query = QUESTIONS["met"]
         person.save()
     return HttpResponse(204)
 
@@ -140,6 +142,7 @@ def update_met(event, person):
     try:
         met = determine_yes_no_answer(event.get("text", ""))
     except ValueError:
+        logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
     # a Person can be either `person_1` or `person_2` on a Match; it's random
