@@ -83,7 +83,7 @@ WSGI_APPLICATION = "meetups.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "slack-meetups"
+        "NAME": os.path.join(BASE_DIR, "slack-meetups.db")
     }
 }
 
