@@ -1,9 +1,12 @@
 import random
 import logging
+import csv
+from datetime import date
 
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
+from django.http import HttpResponse
 
 from .models import Pool, Person, Round, Match
 from .utils import group
@@ -40,8 +43,14 @@ admin.site = ADMIN_SITE # register our custom admin site with Django
 
 @admin.register(Pool, site=ADMIN_SITE)
 class PoolAdmin(admin.ModelAdmin):
+    change_form_template = "pool_change_form.html"
     list_display = ("name", "channel_name")
     search_fields = ("name", "channel_name")
+
+    def response_change(self, request, pool):
+        if "download-pool-members" in request.POST:
+            return download_pool_members(pool)
+        return super().response_change(request, pool)
 
 
 @admin.register(Person, site=ADMIN_SITE)
@@ -55,10 +64,10 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Round, site=ADMIN_SITE)
 class RoundAdmin(admin.ModelAdmin):
+    change_form_template = "round_change_form.html"
     list_display = ("pool", "start_date", "end_date")
     list_filter = ("pool",)
     ordering = ("-start_date",)
-    change_form_template = "round_change_form.html"
 
     def response_change(self, request, round):
         if "do-round-matching" in request.POST:
@@ -128,3 +137,19 @@ def match(round):
         match = Match(person_1=pair[0], person_2=pair[1], round=round)
         match.save()
         logger.info(f"Matched: {match}")
+
+
+def download_pool_members(pool):
+    """return an HttpResponse with a CSV file of all the members in the given
+    pool
+    """
+    members = Person.objects.filter(pools=pool)
+    response = HttpResponse(content_type='text/csv')
+    response["Content-Disposition"] = "attachment; "\
+        f"filename=\"{pool.name} members ({date.today()}).csv\""
+    writer = csv.writer(response)
+    # write a header row describing the columns
+    writer.writerow(["User ID", "Username", "Full Name"])
+    for person in members:
+        writer.writerow([person.user_id, person.user_name, person.full_name])
+    return response
