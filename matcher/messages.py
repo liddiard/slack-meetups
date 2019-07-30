@@ -22,6 +22,12 @@ UPDATED_AVAILABLE = "Sounds good! I’ll pair you with someone at the start of t
 UPDATED_UNAVAILABLE = "Okay, thanks for letting me know. I’ll ask again next time!"
 MET = "Great! Hope you enjoyed meeting {other_person.casual_name} 🙂"
 DID_NOT_MEET = "Thanks for the feedback! Hope you have a chance to meet next time 🙂"
+UNREGISTERED_PERSON = """Hi there! I’m a bot that facilities 1:1 meetups between people. Join a meetup channel:
+
+{channels}
+
+And the next time a pairing round starts, I’ll ask you to provide an intro and pair you with someone!
+"""
 UNKNOWN_QUERY = "Sorry, I don’t know how to respond to most messages! 😬 If you have a question or feedback, you can contact my admin{contact_phrase}"
 INTRO_RECEIVED = "Thanks for the intro, {person.casual_name}! You’ll receive your first pairing at the start of the upcoming round."
 INTRO_RECEIVED_QUESTIONS = "If you have any questions in the meantime, feel free to ask <@{ADMIN_SLACK_USER_ID}>."

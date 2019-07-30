@@ -7,7 +7,7 @@ from django.utils.decorators import decorator_from_middleware
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .middleware import VerifySlackRequest
-from .models import Person, Match
+from .models import Person, Match, Pool
 from .slack import  send_dm
 from .utils import get_person_from_match, get_other_person_from_match
 
@@ -92,8 +92,13 @@ def update_intro(event):
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
-        return JsonResponse(status=404,
-            data={"error": f"user with ID \"{user_id}\" not found"})
+        pools = Pool.objects.all()
+        channels_list = "\n".join(
+            [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
+        )
+        send_dm(user_id,
+            text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
+        return HttpResponse(204)
     # if this person has an intro already, we aren't expecting any further
     # messages from them. send them a message telling them how to reach out
     # if they have questions
