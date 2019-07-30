@@ -92,6 +92,7 @@ def update_intro(event):
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
+        # user is unregistered, send an informational message
         pools = Pool.objects.all()
         channels_list = "\n".join(
             [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
