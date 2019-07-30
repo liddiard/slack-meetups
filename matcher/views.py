@@ -44,6 +44,9 @@ def handle_slack_message(request):
         channels_list = "\n".join(
             [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
         )
+        message_text = event.get("text")
+        logger.info(f"Received query from unregistered user {user_id}: "\
+            f"\"{message_text}\".")
         send_dm(user_id,
             text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
         return HttpResponse(204)
@@ -147,8 +150,9 @@ def ask_if_met(person):
 def update_met(event, person):
     """update a Match's `met` status with the provided yes/no answer
     """
+    message_text = event.get("text", "")
     try:
-        met = determine_yes_no_answer(event.get("text", ""))
+        met = determine_yes_no_answer(message_text)
     except ValueError:
         logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
