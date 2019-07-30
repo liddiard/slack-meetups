@@ -97,6 +97,8 @@ def update_intro(event):
         channels_list = "\n".join(
             [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
         )
+        logger.info(f"Received query from unregistered user {user_id}: "\
+            f"\"{message_text}\".")
         send_dm(user_id,
             text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
         return HttpResponse(204)
