@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
-from .models import Person, Match
+from .models import Person, Match, Pool
 from .slack import  send_dm
 from .utils import get_other_person_from_match, determine_yes_no_answer
 from .constants import QUESTIONS
@@ -26,7 +26,7 @@ def handle_slack_message(request):
     except ValueError:
         return JsonResponse(status=400, 
             data={"error": "request body is not valid JSON"})
-    # To verify our app's URL, Slack sends a POST JSON payload with a 
+    # To verify our app's URL, Slack sends a POST JSON payload with a
     # "challenge" parameter with which the app must respond to verify it.
     # Only allow this in debug mode.
     if DEBUG and event.get("challenge"):
@@ -39,8 +39,14 @@ def handle_slack_message(request):
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
-        return JsonResponse(status=404,
-            data={"error": f"user with ID \"{user_id}\" not found"})
+        # user is unregistered, send an informational message
+        pools = Pool.objects.all()
+        channels_list = "\n".join(
+            [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
+        )
+        send_dm(user_id,
+            text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
+        return HttpResponse(204)
     message_map = {
         QUESTIONS["intro"]: update_intro,
         QUESTIONS["met"]: update_met,
@@ -48,6 +54,8 @@ def handle_slack_message(request):
     }
     message = event.get("text")
     if not person.last_query:
+        # the bot didn't ask the user anything, tell them we don't know how to
+        # respond
         if ADMIN_SLACK_USER_ID:
             contact_phrase = f", <@{ADMIN_SLACK_USER_ID}>."
         else:
