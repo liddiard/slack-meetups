@@ -26,7 +26,7 @@ UNREGISTERED_PERSON = """Hi there! I’m a bot that facilities 1:1 meetups betwe
 
 {channels}
 
-And the next time a pairing round starts, I’ll ask you to provide an intro and pair you with someone!
+And the next time a pairing round starts, I’ll ask you for an intro and pair you with someone!
 """
 UNKNOWN_QUERY = "Sorry, I don’t know how to respond to most messages! 😬 If you have a question or feedback, you can contact my admin{contact_phrase}"
 INTRO_RECEIVED = "Thanks for the intro, {person.casual_name}! You’ll receive your first pairing at the start of the upcoming round."
