@@ -2,10 +2,12 @@
 
 {% block submit_buttons_bottom %}
     {{ block.super }}
-    <div class="submit-row">
-        <span style="line-height: 2.5">
-            Create matches for this round and send matching messages:
-        </span>
-        <input type="submit" class="default" value="Do round matching" name="do-round-matching">
-    </div>
+    {% if change %}
+        <div class="submit-row">
+            <span style="line-height: 2.5">
+                Create matches for this round and send matching messages:
+            </span>
+            <input type="submit" class="default" value="Do round matching" name="do-round-matching">
+        </div>
+    {% endif %}
 {% endblock %}

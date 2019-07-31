@@ -2,7 +2,9 @@
 
 {% block submit_buttons_bottom %}
     {{ block.super }}
-    <div class="submit-row">
-        <input type="submit" class="default" value="Download pool members (CSV)" name="download-pool-members">
-    </div>
+    {% if change %}
+        <div class="submit-row">
+            <input type="submit" class="default" value="Download pool members (CSV)" name="download-pool-members">
+        </div>
+    {% endif %}
 {% endblock %}
