@@ -8,3 +8,4 @@ matcher/migrations/
 app.yaml
 /static/
 rtmProxy/node_modules/
+app.log

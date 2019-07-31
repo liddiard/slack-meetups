@@ -17,9 +17,11 @@ It supports variable frequency and length for rounds of matching, multiple match
 - SQLite 3 (you can change databases if you need something more robust, but it's not a particularly database-intensive application)
 - Slack Python SDK
 
+**Need to use the Slack [Real-Time Messaging (RTM) API](https://api.slack.com/rtm) instead of the [Events API](https://api.slack.com/events-api)?** Check out the `rtm` branch. You will need to use the RTM API if you're inside a corporate intranet or firewall that won't allow you to receive events from Slack on a publicly accessible URL. The `rtm` branch has a Node.js proxy server under `rtmProxy/` that connects to the socket-based RTM API and forwards events to the Django server. The RTM API doesn't support Slack's interactive components like action buttons, so they are replaced with having users just type a "yes"/"no" response to the bot.
+
 ## User guide for admins
 
-*Note: This section assumes an already-configured and deployed server. For deployment instructions, [see below](#deployment-instructions).*
+*Note: This section assumes an already-configured and deployed server. For setup instructions, [see below](#setup-instructions).*
 
 ### Add people to a Slack channel
 
@@ -134,6 +136,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 5. `python manage.py migrate` to create the database tables
 5. `python manage.py createsuperuser` to create your user to log in to the admin
 6. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups.wsgi`.
+7. Log in to the admin and follow the steps above to set up a matching pool. The admin URL is `<your base url>:<port number>/admin/`.
 
 ## TODO
 

@@ -134,14 +134,17 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {
         "console": {
-            "level": "INFO",
             "class": "logging.StreamHandler",
             "stream": sys.stdout
-        }
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "app.log"),
+        },
     },
     "loggers": {
         "": { # empty string is the default logger config
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": "INFO",
             "propagate": True
         },
