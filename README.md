@@ -21,7 +21,7 @@ It supports variable frequency and length for rounds of matching, multiple match
 
 ## User guide for admins
 
-*Note: This section assumes an already-configured and deployed server. For deployment instructions, [see below](#deployment-instructions).*
+*Note: This section assumes an already-configured and deployed server. For setup instructions, [see below](#setup-instructions).*
 
 ### Add people to a Slack channel
 
