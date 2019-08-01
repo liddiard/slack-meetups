@@ -161,6 +161,16 @@ def ask_availability(round):
     the upcoming round, adding and removing Pool members based on the current
     Slack channel membership
     """
+
+    def send_availability_question(person):
+        """actually send a direct message to ask if a person is available
+        and update the person's last_query accordingly
+        """
+        send_dm(person.user_id,
+            text=messages.ASK_IF_AVAILABLE.format(person=person))
+        person.last_query = QUESTIONS["availability"]
+        person.save()
+    
     channel_members = get_channel_members(round.pool.channel_id)
     # Get the People in the DB for this Pool, excluding anyone who hasn't
     # written an intro yet. We're considering them excluded, partially for
@@ -179,14 +189,16 @@ def ask_availability(round):
         if person.user_id not in channel_members:
             person.pools.remove(round.pool)
             logger.info(f"Removed {person} from pool \"{round.pool}\".")
-            continue
-        send_dm(person.user_id,
-            text=messages.ASK_IF_AVAILABLE.format(person=person))
-        person.last_query = QUESTIONS["availability"]
-        person.save()
+        else:
+            send_availability_question(person)
     for user_id in channel_members:
         try:
-            Person.objects.get(user_id=user_id)
+            person = Person.objects.get(user_id=user_id)
+            # if the person isn't in this pool, add them and ask for their
+            # availability
+            if round.pool not in person.pools.all():
+                person.pools.add(round.pool)
+                send_availability_question(person)
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
         except Person.DoesNotExist:
