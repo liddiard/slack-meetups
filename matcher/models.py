@@ -198,6 +198,7 @@ def ask_availability(round):
             # availability
             if round.pool not in person.pools.all():
                 person.pools.add(round.pool)
+                logger.info(f"Added {person} to pool \"{round.pool}\".")
                 send_availability_question(person)
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
@@ -205,6 +206,9 @@ def ask_availability(round):
             # get the user's Slack profile
             # https://api.slack.com/methods/users.info
             user = client.users_info(user=user_id)
+            # don't add a Person if the user is a bot
+            if user["user"]["is_bot"]:
+                continue
             try:
                 # keys on "profile" are not guaranteed to exist
                 full_name = user["user"]["profile"]["real_name"]
