@@ -196,6 +196,9 @@ def ask_availability(round):
             # get the user's Slack profile
             # https://api.slack.com/methods/users.info
             user = client.users_info(user=user_id)
+            # don't add a Person if the user is a bot
+            if user["user"]["is_bot"]:
+                continue
             try:
                 # keys on "profile" are not guaranteed to exist
                 full_name = user["user"]["profile"]["real_name"]
