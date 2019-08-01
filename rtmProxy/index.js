@@ -26,6 +26,16 @@ rtm.on('message', async (event) => {
     // ignore messages sent from the bot so it doesn't respond to itself
     return;
   }
+  if (typeof event.channel !== 'string' || !event.channel.startsWith('D')) {
+    // ignore messages that are not direct messages – this allows us to add
+    // the bot to channels and not have it respond to messages in the channel.
+    // the goal of this is to allow the bot to work in private channels where
+    // it needs to be a memeber of the channel in order to read the members
+    // list. if a channel starts with a "D", it's a direct message. this
+    // feature is not officially documented but seems reliable... see:
+    // https://stackoverflow.com/a/42013042
+    return;
+  }
   console.log('message received from Slack:', event);
   let response;
   try {
