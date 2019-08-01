@@ -188,6 +188,7 @@ def ask_availability(round):
             # availability
             if round.pool not in person.pools.all():
                 person.pools.add(round.pool)
+                logger.info(f"Added {person} to pool \"{round.pool}\".")
                 send_availability_question(person)
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
