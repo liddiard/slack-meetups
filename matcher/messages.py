@@ -13,11 +13,11 @@ Please *introduce yourself* by replying with a short description of what you do.
 
 After I have your introduction, you’ll get your first pairing!
 """
-MATCH_1 = """Hey {recipient.casual_name}, meet your pairing for this week, {match.full_name} (<@{match.user_id}>)! Here’s a little about {match.casual_name} in their own words:
+MATCH_INTRO = """Hey {recipient.casual_name}, meet your pairing for this week, {match.full_name}! Here’s a little about {match.casual_name} in their own words:
 
 > {match.intro}
 """
-MATCH_2 = "*Message <@{match.user_id}> to pick a time to meet this week!*"
+MATCH_INSTRUCTIONS = "Message each other here to *pick a time to meet* this week!"
 UPDATED_AVAILABLE = "Sounds good! I’ll pair you with someone at the start of the upcoming round."
 UPDATED_UNAVAILABLE = "Okay, thanks for letting me know. I’ll ask again next time!"
 MET = "Great! Hope you enjoyed meeting {other_person.casual_name} 🙂"
