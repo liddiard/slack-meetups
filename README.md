@@ -89,7 +89,7 @@ For people who've already provided an intro, they'll get a message asking if the
 
 ### Do the matching!
 
-Once you've given people enough time to write their intro or update their availability, it's time to start the round! From the admin main page, under the "Matcher" list, click "Rounds". Select the round you created, and at the bottom right, click "Do round matching". People in the pool who've responded as available will be randomly paired up and each receive a direct message with their partner's info:
+Once you've given people enough time to write their intro or update their availability, it's time to start the round! From the admin main page, under the "Matcher" list, click "Rounds". Select the round you created, and at the bottom right, click "Do round matching". People in the pool who've responded as available will be randomly paired up. The bot will create a group DM between the two people and introduce them to each other:
 
 ![match received](screenshots/match_received.png)
 
