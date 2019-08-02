@@ -128,6 +128,10 @@ class Match(models.Model):
     person_2 = models.ForeignKey(Person, on_delete=models.CASCADE, 
         related_name="+")
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
+    conversation_id = models.CharField(max_length=11, unique=True, null=True,
+        blank=True)
+    conversation_id.help_text = "ID of the Slack direct message between "\
+        "these people"
     # whether or not this pair actually met
     met = models.BooleanField(null=True) # `null` corresponds to unknown
     met.help_text = "Whether or not this pair actually met up"
@@ -137,9 +141,8 @@ class Match(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # automatically send matching messages when a match is created
-            send_matching_message(self.person_1, self.person_2)
-            send_matching_message(self.person_2, self.person_1)
+            # automatically send matching message when a match is created
+            open_match_dm(self)
         super(Match, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -235,12 +238,30 @@ def get_channel_members(channel_id, limit=200):
     return members
 
 
-def send_matching_message(recipient, match):
+def send_matching_message(conversation_id, recipient, match):
     """notify the two people in a Match that they've been paired with
     instructions to message each other to meet up
     """
-    send_dm(recipient.user_id, 
-        text=messages.MATCH_1.format(recipient=recipient, match=match))
-    send_dm(recipient.user_id, 
-        text=messages.MATCH_2.format(match=match))
-    logger.info(f"Sent matching messages for match: {match}.")
+    client.chat_postMessage(channel=conversation_id, as_user=True,
+        text=messages.MATCH_INTRO.format(recipient=recipient, match=match))
+
+
+def open_match_dm(self):
+    """create a group direct message between the two people in a match and
+    introduce them to each other
+    """
+    user_ids = ",".join([self.person_1.user_id, self.person_2.user_id])
+    response = client.conversations_open(users=user_ids)
+    try:
+        self.conversation_id = response["channel"]["id"]
+    except KeyError:
+        return logger.error(f"Failed to create conversation for match between"
+            f" {self.person_1} and {self.person_2}.")
+    # send people's introductions to each other in the channel
+    send_matching_message(conversation_id=self.conversation_id,
+        recipient=self.person_1, match=self.person_2)
+    send_matching_message(conversation_id=self.conversation_id,
+        recipient=self.person_2, match=self.person_1)
+    client.chat_postMessage(channel=self.conversation_id, as_user=True,
+        text=messages.MATCH_INSTRUCTIONS)
+    logger.info(f"Sent matching messages for match: {self}.")
