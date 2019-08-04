@@ -13,7 +13,7 @@ Please *introduce yourself* by replying with a short description of what you do.
 
 After I have your introduction, you’ll get your first pairing!
 """
-MATCH_INTRO = """Hey {recipient.casual_name}, meet your pairing for this week, {match.full_name}! Here’s a little about {match.casual_name} in their own words:
+MATCH_INTRO = """{recipient.casual_name}, meet your pairing for this week, {match.full_name}! Here’s a little about {match.casual_name} in their own words:
 
 > {match.intro}
 """
