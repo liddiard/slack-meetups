@@ -1,5 +1,6 @@
-import logging
 from datetime import date, timedelta
+import logging
+import pytz
 
 from django.db import models
 
@@ -30,6 +31,11 @@ class Pool(models.Model):
         "for the Slack channel when loaded in a web browser."
     channel_name = models.CharField(max_length=21)
     channel_name.help_text = "Name of the Slack channel, like “#interns-2020”"
+    TIMEZONE_CHOICES = zip(pytz.common_timezones, pytz.common_timezones)
+    timezone = models.CharField(max_length=30, default="UTC",
+        choices=TIMEZONE_CHOICES)
+    timezone.help_text = "Timezone of this pool for automated, scheduled "\
+        "matching."
 
     def __str__(self):
         return self.name
