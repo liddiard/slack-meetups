@@ -24,7 +24,7 @@
         mondaysThisMonth = getMondays(date);
     date.setMonth(nextMonth);
     const mondaysNextMonth = getMondays(date),
-        matchingDays = [mondaysThisMonth[0], mondaysThisMonth[2], mondaysNextMonth[0]],
+        matchingDays = [mondaysThisMonth[1], mondaysThisMonth[3], mondaysNextMonth[1]],
         nextMatchingDate = matchingDays.find(day => day > new Date()),
         nextMatchingDateString = `Monday, ${nextMatchingDate.toLocaleString('en-us', { month: 'long' })} ${nextMatchingDate.getDate()}`;
     
