@@ -43,7 +43,7 @@ def determine_yes_no_answer(message):
     the affirmative (True), or in the negative (False). Raises a ValueError if
     unable to determine.
     """
-    yes_words = ["yes", "y", "yeah", "yea", "yep", "yus", "yas"]
+    yes_words = ["yes", "y", "yeah", "yea", "yep", "yus", "yas", "sure"]
     no_words = ["no", "n", "nope", "nah"]
     yes_response = False
     no_response = False
