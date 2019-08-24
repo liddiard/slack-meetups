@@ -275,10 +275,7 @@ def open_match_dm(self):
         return logger.error(f"Failed to create conversation for match between"
             f" {self.person_1} and {self.person_2}.")
     # send people's introductions to each other in the channel
-    send_matching_message(conversation_id=self.conversation_id,
-        recipient=self.person_1, match=self.person_2)
-    send_matching_message(conversation_id=self.conversation_id,
-        recipient=self.person_2, match=self.person_1)
     client.chat_postMessage(channel=self.conversation_id, as_user=True,
-        text=messages.MATCH_INSTRUCTIONS)
+        text=messages.MATCH_INTRO.format(person_1=self.person_1,
+        person_2=self.person_2))
     logger.info(f"Sent matching messages for match: {self}.")
