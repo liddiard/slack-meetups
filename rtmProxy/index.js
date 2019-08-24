@@ -27,7 +27,7 @@ rtm.on('message', async (event) => {
     return;
   }
   if (typeof event.channel !== 'string' || !event.channel.startsWith('D') ||
-      event.user === 'SLACKBOT') {
+      event.user === 'USLACKBOT') {
     // ignore messages that are not direct messages – this allows us to add
     // the bot to channels and not have it respond to messages in the channel.
     // the goal of this is to allow the bot to work in private channels where
