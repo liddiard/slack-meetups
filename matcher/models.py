@@ -29,7 +29,7 @@ class Pool(models.Model):
     channel_id = models.CharField(max_length=9, unique=True)
     channel_id.help_text = "Slack channel ID. You can get this from the URL "\
         "for the Slack channel when loaded in a web browser."
-    channel_name = models.CharField(max_length=21)
+    channel_name = models.CharField(max_length=80)
     channel_name.help_text = "Name of the Slack channel, like “#interns-2020”"
     TIMEZONE_CHOICES = zip(pytz.common_timezones, pytz.common_timezones)
     timezone = models.CharField(max_length=30, default="UTC",
