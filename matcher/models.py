@@ -255,14 +255,6 @@ def get_channel_members(channel_id, limit=200):
     return members
 
 
-def send_matching_message(conversation_id, recipient, match):
-    """notify the two people in a Match that they've been paired with
-    instructions to message each other to meet up
-    """
-    client.chat_postMessage(channel=conversation_id, as_user=True,
-        text=messages.MATCH_INTRO.format(recipient=recipient, match=match))
-
-
 def open_match_dm(self):
     """create a group direct message between the two people in a match and
     introduce them to each other
@@ -275,7 +267,9 @@ def open_match_dm(self):
         return logger.error(f"Failed to create conversation for match between"
             f" {self.person_1} and {self.person_2}.")
     # send people's introductions to each other in the channel
+    # `unfurl_links=False` prevents link previews from appearing if someone
+    # included a link in their intro
     client.chat_postMessage(channel=self.conversation_id, as_user=True,
         text=messages.MATCH_INTRO.format(person_1=self.person_1,
-        person_2=self.person_2))
+        person_2=self.person_2), unfurl_links=False)
     logger.info(f"Sent matching messages for match: {self}.")
