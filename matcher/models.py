@@ -96,6 +96,7 @@ class Person(models.Model):
 
     class Meta:
         verbose_name_plural = "people"
+        ordering = ["full_name"]
 
     @staticmethod
     def get_first_name(full_name):
@@ -123,6 +124,9 @@ class Round(models.Model):
     pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
     start_date = models.DateField(default=date.today)
     end_date = models.DateField(default=get_default_end_date)
+
+    class Meta:
+        ordering = ["-start_date"]
 
     def save(self, *args, **kwargs):
         if not self.pk:
