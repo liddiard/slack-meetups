@@ -13,12 +13,12 @@ Please *introduce yourself* by replying with a short description of what you do.
 
 After I have your introduction, you’ll get your first pairing!
 """
-MATCH_INTRO = """{person_1.casual_name}, meet your pairing for this week, {person_2.full_name}! Here’s a little about {person_2.casual_name} in their own words:
+MATCH_INTRO = """*{person_1.casual_name}*, meet your pairing for this week, {person_2.full_name}! Here’s a little about {person_2.casual_name} in their own words:
 
 > {person_2.intro}
 
 
-{person_2.casual_name}, meet your pairing for this week, {person_1.full_name}! Here’s a little about {person_1.casual_name} in their own words:
+*{person_2.casual_name}*, meet your pairing for this week, {person_1.full_name}! Here’s a little about {person_1.casual_name} in their own words:
 
 > {person_1.intro}
 
