@@ -15,7 +15,6 @@ from .utils import group
 logger = logging.getLogger(__name__)
 
 
-
 class IntroListFilter(admin.SimpleListFilter):
     title = "has intro"
     parameter_name = "has_intro"
@@ -149,7 +148,8 @@ def download_pool_members(pool):
         f"filename=\"{pool.name} members ({date.today()}).csv\""
     writer = csv.writer(response)
     # write a header row describing the columns
-    writer.writerow(["User ID", "Username", "Full Name"])
+    writer.writerow(["User ID", "User name", "Full name", "Has intro"])
     for person in members:
-        writer.writerow([person.user_id, person.user_name, person.full_name])
+        writer.writerow([person.user_id, person.user_name, person.full_name,
+            person.has_intro()])
     return response
