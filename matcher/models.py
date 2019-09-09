@@ -15,8 +15,8 @@ def get_default_end_date():
     """calculate the default end date for a Round from the curent date
     """
     # https://stackoverflow.com/a/12654998
-    # rounds typically start on a Monday and end on a Friday (5 days later)
-    return date.today() + timedelta(days=5)
+    # rounds typically start on a Monday and end on a Friday (4 days later)
+    return date.today() + timedelta(days=4)
 
 
 class Pool(models.Model):
