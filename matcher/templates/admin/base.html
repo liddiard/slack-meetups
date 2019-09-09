@@ -1,4 +1,10 @@
+{% load static %}
 {% extends "admin/base.html" %}
+
+{% block extrahead %}
+<link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
+{% endblock %}
+
 {% block extrastyle %}
 <style>
     :root {
