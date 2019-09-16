@@ -138,8 +138,7 @@ class Match(models.Model):
     person_2 = models.ForeignKey(Person, on_delete=models.CASCADE, 
         related_name="+")
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
-    conversation_id = models.CharField(max_length=11, unique=True, null=True,
-        blank=True)
+    conversation_id = models.CharField(max_length=11, null=True, blank=True)
     conversation_id.help_text = "ID of the Slack direct message between "\
         "these people"
     # whether or not this pair actually met
