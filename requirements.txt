@@ -1,2 +1,2 @@
-Django==2.2.4
+Django==2.2.10
 slackclient==2.1.0

@@ -5,7 +5,9 @@ from datetime import date
 
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
+from django.contrib.auth.models import GroupAdmin
 from django.http import HttpResponse
 
 from .models import Pool, Person, Round, Match
@@ -94,8 +96,11 @@ class MatchAdmin(admin.ModelAdmin):
 
 # readd the built-in "authentication and authorization" models to our custom
 # admin site
-admin.site.register(User)
-admin.site.register(Group)
+# note: it's important to register Users and Groups with their respective 
+# admins, otherwise they will be missing important methods like the one to 
+# hash User passwords, see: https://stackoverflow.com/a/32852793
+admin.site.register(User, UserAdmin)
+admin.site.register(Group, GroupAdmin)
 
 
 def match(round):
