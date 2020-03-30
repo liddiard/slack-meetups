@@ -212,8 +212,10 @@ def update_met(payload, action, block_id):
         return JsonResponse(status=400,
             data={"error": "request payload is missing user ID"})
     # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (Match.objects.filter(person_1__user_id=user_id) |
-                    Match.objects.filter(person_2__user_id=user_id))
+    user_matches = (
+        Match.objects.filter(round__pool=pool, person_1__user_id=user_id) |
+        Match.objects.filter(round__pool=pool, person_2__user_id=user_id)
+    )
     try:
         match = user_matches.get(id=block_id)
     except Match.DoesNotExist:
