@@ -171,8 +171,10 @@ def update_met(event, person):
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
     # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (Match.objects.filter(person_1__user_id=person.user_id) |
-                    Match.objects.filter(person_2__user_id=person.user_id))
+    user_matches = (
+        Match.objects.filter(round__pool=pool, person_1=person) |
+        Match.objects.filter(round__pool=pool, person_2=person)
+    )
     if not user_matches:
         return JsonResponse(status=404,
             data={"error": f"user \"{person.user_id}\" does not have any "
