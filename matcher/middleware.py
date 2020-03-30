@@ -24,8 +24,17 @@ class VerifySlackRequest:
         # implementation partially from:
         # https://janikarhunen.fi/verify-slack-requests-in-aws-lambda-and-python
 
-        timestamp = request.headers["X-Slack-Request-Timestamp"]
-        slack_signature = request.headers["X-Slack-Signature"]
+        try:
+            timestamp = request.headers["X-Slack-Request-Timestamp"]
+        except KeyError:
+            return JsonResponse(status=400,
+                data={"error": "missing header \"X-Slack-Request-Timestamp\""})
+        try:
+            slack_signature = request.headers["X-Slack-Signature"]
+        except KeyError:
+            return JsonResponse(status=400,
+                data={"error": "missing header \"X-Slack-Signature\""})
+
         # make the signing secret a bytestring
         signing_secret = bytes(settings.SLACK_SIGNING_SECRET, "utf-8")
         request_body = request.body.decode('utf-8')

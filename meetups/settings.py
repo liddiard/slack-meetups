@@ -32,6 +32,8 @@ else:
 
 ALLOWED_HOSTS = [
     "localhost",
+    "127.0.0.1",
+    "1f8eb9f7.ngrok.io",
     "slack-meetups.appspot.com"
 ]
 
@@ -153,10 +155,10 @@ LOGGING = {
 
 
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
-SLACK_API_TOKEN = os.getenv("SLACK_API_TOKEN")
+SLACK_API_TOKEN = os.environ["SLACK_API_TOKEN"]
 
 # signing secret comes from this page: https://api.slack.com/apps/AH99D6ZLH
-SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
+SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
 
 # Slack user ID of the admin for this Slack application who users should reach
 # out to if they have questions

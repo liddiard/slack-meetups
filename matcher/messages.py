@@ -13,12 +13,12 @@ Please *introduce yourself* by replying with a short description of what you do.
 
 After I have your introduction, you’ll get your first pairing!
 """
-MATCH_INTRO = """*{person_1.casual_name}*, meet your pairing for this week, {person_2.full_name}! Here’s a little about {person_2.casual_name} in their own words:
+MATCH_INTRO = """*{person_1.casual_name}*, meet your {pool.name} pairing, {person_2.full_name}! Here’s a little about {person_2.casual_name} in their own words:
 
 > {person_2.intro}
 
 
-*{person_2.casual_name}*, meet your pairing for this week, {person_1.full_name}! Here’s a little about {person_1.casual_name} in their own words:
+*{person_2.casual_name}*, meet your {pool.name} pairing, {person_1.full_name}! Here’s a little about {person_1.casual_name} in their own words:
 
 > {person_1.intro}
 
@@ -45,12 +45,12 @@ BLOCKS = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Last time on {start_date}, you paired with {other_person.full_name} (<@{other_person.user_id}>). Did you have a chance to meet up with {other_person.casual_name}?"
+                "text": "Last time in <#{pool.channel_id}|{pool.channel_name}>, you paired with {other_person.full_name} (<@{other_person.user_id}>). Did you have a chance to meet up with {other_person.casual_name}?"
             }
         },
         {
             "type": "actions",
-            "block_id": "met-{id}",
+            "block_id": "met-{id}", # Match ID
             "elements": [
                 {
                     "type": "button",
@@ -77,12 +77,12 @@ BLOCKS = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Hey {person.casual_name}, want to be paired to meet someone new this week?"
+                "text": "Hey {person.casual_name}, want to be paired to meet someone new in <#{pool.channel_id}|{pool.channel_name}> this week?"
             }
         },
         {
             "type": "actions",
-            "block_id": "availability-{id}",
+            "block_id": "availability-{id}", # Pool ID
             "elements": [
                 {
                     "type": "button",

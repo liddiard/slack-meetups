@@ -26,7 +26,7 @@ class Pool(models.Model):
     name = models.CharField(max_length=64, unique=True)
     name.help_text = "A human-readable name for this pool, like “2020 "\
         "interns”"
-    channel_id = models.CharField(max_length=9, unique=True)
+    channel_id = models.CharField(max_length=11, unique=True)
     channel_id.help_text = "Slack channel ID. You can get this from the URL "\
         "for the Slack channel when loaded in a web browser."
     channel_name = models.CharField(max_length=80)
@@ -68,18 +68,16 @@ class Person(models.Model):
     intro = models.TextField(blank=True)
     intro.help_text = "Introduction that appears to other people when this "\
         "person is matched with them."
-    available = models.BooleanField(null=True) # `null` corresponds to unknown
-    available.help_text = "Whether or not this person is available for "\
-        "and interested in being matched."
     can_be_excluded = models.BooleanField(default=False)
     can_be_excluded.help_text = "Whether or not, in the event of an odd "\
         "number of available people in a matching pool, this person could "\
         "be excluded. Every pool needs at least one available person who "\
         "can be excluded."
-    pools = models.ManyToManyField(Pool, blank=True)
+    pools = models.ManyToManyField(Pool, through='PoolMembership', blank=True)
     pools.help_text = "Matching pools of which this person is a member. "\
         "This is automatically updated based on Slack channel membership "\
-        "whenever a round is started in a particular pool."
+        "whenever a round is started in a particular pool. It can also be "\
+        "updated from the Pool Membership page."
     joined = models.DateTimeField(auto_now_add=True)
     joined.help_text = "When this person was first picked up by the bot, "\
         "usually the creation time of the first round in a pool they joined."
@@ -106,6 +104,18 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.user_name})"
+
+
+class PoolMembership(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
+    available = models.BooleanField(null=True) # null corresponds to unknown
+    available.help_text = "Whether or not this person is available to be "\
+        "paired with someone in this pool"
+
+    def __str__(self):
+        return f"{self.person} in {self.pool}"
+
 
 class Round(models.Model):
     """a time interval for a Pool in which specific People are paired together
@@ -164,16 +174,17 @@ def ask_availability(round):
     Slack channel membership
     """
 
-    def send_availability_question(person):
+    def send_availability_question(person, pool):
         """actually send a direct message to ask if a person is available"""
         blocks = messages.format_block_text(
             "ASK_IF_AVAILABLE", 
-            person.id,
-            {"person": person}
+            pool.id,
+            {"person": person, "pool": pool}
         )
         send_dm(person.user_id, blocks=blocks)
     
-    channel_members = get_channel_members(round.pool.channel_id)
+    pool = round.pool
+    channel_members = get_channel_members(pool.channel_id)
     # Get the People in the DB for this Pool, excluding anyone who hasn't
     # written an intro yet. We're considering them excluded, partially for
     # technical reasons: We don't currently keep track of the last message
@@ -182,26 +193,28 @@ def ask_availability(round):
     # if they're responding with a intro or some other query. But also for UX
     # reasons: it seems reasonable that someone who didn't respond to the
     # bot's initial query is not interested enough to participate.
-    people = Person.objects.filter(pools=round.pool).exclude(intro="")
-    # initially set everyone's availability to unknown
-    people.update(available=None)
+    people = Person.objects.filter(pools=pool).exclude(intro="")
     for person in people:
+        # initially set everyone's availability to unknown (None)
+        pool_membership = PoolMembership.objects.get(person=person, pool=pool)
+        pool_membership.available = None
+        pool_membership.save()
         # if this person has left this pool, update the database to reflect
         # this and don't send them a request for availability
         if person.user_id not in channel_members:
-            person.pools.remove(round.pool)
-            logger.info(f"Removed {person} from pool \"{round.pool}\".")
+            person.pools.remove(pool)
+            logger.info(f"Removed {person} from pool \"{pool}\".")
         else:
-            send_availability_question(person)
+            send_availability_question(person, pool)
     for user_id in channel_members:
         try:
             person = Person.objects.get(user_id=user_id)
             # if the person isn't in this pool, add them and ask for their
             # availability
-            if round.pool not in person.pools.all():
-                person.pools.add(round.pool)
-                logger.info(f"Added {person} to pool \"{round.pool}\".")
-                send_availability_question(person)
+            if pool not in person.pools.all():
+                PoolMembership.objects.create(person=person, pool=pool)
+                logger.info(f"Added {person} to pool \"{pool}\".")
+                send_availability_question(person, pool)
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
         except Person.DoesNotExist:
@@ -223,11 +236,10 @@ def ask_availability(round):
                 full_name=full_name,
                 casual_name=Person.get_first_name(full_name))
             person.save()
-            person.pools.add(round.pool)
-            logger.info(f"Added {person} to pool \"{round.pool}\".")
+            PoolMembership.objects.create(person=person, pool=pool)
+            logger.info(f"Added {person} to pool \"{pool}\".")
             send_dm(user_id, 
-                text=messages.WELCOME_INTRO.format(person=person,
-                    pool=round.pool))
+                text=messages.WELCOME_INTRO.format(person=person, pool=pool))
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 
@@ -263,5 +275,5 @@ def open_match_dm(self):
     # included a link in their intro
     client.chat_postMessage(channel=self.conversation_id, as_user=True,
         text=messages.MATCH_INTRO.format(person_1=self.person_1,
-        person_2=self.person_2), unfurl_links=False)
+        person_2=self.person_2, pool=self.round.pool), unfurl_links=False)
     logger.info(f"Sent matching messages for match: {self}.")
