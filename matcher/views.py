@@ -119,7 +119,12 @@ def update_availability(event, person):
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
     pool = person.last_query_pool
-    pool_membership = PoolMembership.objects.get(pool=pool, person=person)
+    try:
+        pool_membership = PoolMembership.objects.get(pool=pool, person=person)
+    except PoolMembership.DoesNotExist:
+        return JsonResponse(status=400,
+            data={"error": f"pool membership does not exist with pool: "\
+                f"{pool} and person: {person}"})
     pool_membership.available = available
     pool_membership.save()
     logger.info(f"Set the availability of {person} in {pool} to {available}.")
