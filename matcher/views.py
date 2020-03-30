@@ -157,7 +157,12 @@ def update_availability(payload, action, pool_id):
         return JsonResponse(status=400, 
             data={"error": f"pool does not exist with id {pool_id}"})
     person = Person.objects.get(user_id=user_id)
-    pool_membership = PoolMembership.objects.get(pool=pool, person=person)
+    try:
+        pool_membership = PoolMembership.objects.get(pool=pool, person=person)
+    except PoolMembership.DoesNotExist:
+        return JsonResponse(status=400,
+            data={"error": f"pool membership does not exist with pool: "\
+                f"{pool} and person: {person}"})
     pool_membership.available = available
     pool_membership.save()
     if available:
