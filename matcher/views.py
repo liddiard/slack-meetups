@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
-from .models import Person, Match, Pool
+from .models import Person, Match, Pool, PoolMembership
 from .slack import  send_dm
 from .utils import get_other_person_from_match, determine_yes_no_answer
 from .constants import QUESTIONS
@@ -35,6 +35,15 @@ def handle_slack_message(request):
     if event_type != "message":
         return JsonResponse(status=400, 
             data={"error": f"invalid event type \"{event_type}\""})
+    # Ignore messages from bots so the bot doesn't get stuck in an infinite
+    # conversation loop with itself.
+    bot_id = event.get("bot_id")
+    if bot_id:
+        return HttpResponse(204)
+    # Currently the only free-text (as opposed to action blocks) message we
+    # expect from the user is their intro. If we wanted to support more text
+    # messages in the future, we'd have to store the last sent message type on
+    # the Person object, probably as a CHOICES enum
     user_id = event.get("user")
     try:
         person = Person.objects.get(user_id=user_id)
@@ -82,12 +91,13 @@ def update_intro(event, person):
     user_id = event.get("user")
     message_text = event.get("text", "")
     person.intro = message_text
-    # assume availability for a person's first time
+    person.last_query = None
+    person.last_query_pool = None
+    person.save()
+    # automatically set the Person to available for their first time
     # if people have an issue with this, they can contact
     # `ADMIN_SLACK_USER_ID`. Might revisit if this causes issues.
-    person.available = True
-    person.last_query = None
-    person.save()
+    PoolMembership.objects.filter(person=person).update(available=True)
     logger.info(f"Onboarded {person} with intro!")
     message = messages.INTRO_RECEIVED.format(person=person)
     if ADMIN_SLACK_USER_ID:
@@ -108,25 +118,30 @@ def update_availability(event, person):
         logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
-    person.available = available
-    person.last_query = None
-    person.save()
-    logger.info(f"Set the availability of {person} to {person.available}.")
+    pool = person.last_query_pool
+    pool_membership = PoolMembership.objects.get(pool=pool, person=person)
+    pool_membership.available = available
+    pool_membership.save()
+    logger.info(f"Set the availability of {person} in {pool} to {available}.")
     if available:
         message = messages.UPDATED_AVAILABLE
     else:
         message = messages.UPDATED_UNAVAILABLE
     send_dm(person.user_id, text=message)
-    ask_if_met(person)
+    ask_if_met(person, pool)
     return HttpResponse(204)
 
 
-def ask_if_met(person):
+def ask_if_met(person, pool):
     """ask this person if they met up with their last match (if any)
     """
+    # ask this person if they met up with their last match in this pool, if 
+    # any, and if we don't know yet
     # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (Match.objects.filter(person_1__user_id=person.user_id) |
-                    Match.objects.filter(person_2__user_id=person.user_id))
+    user_matches = (
+        Match.objects.filter(round__pool=pool, person_1=person) |
+        Match.objects.filter(round__pool=pool, person_2=person)
+    )
     if not user_matches:
         # if the Person hasn't matched with anyone yet, skip sending this
         # message
@@ -135,14 +150,12 @@ def ask_if_met(person):
     # if the Person or their match hasn't already provided feedback on their
     # last match, continue to ask if they met
     if latest_match.met is None:
-        # example: "Monday, May 5"
-        date_format = "%A, %b %-d"
         other_person = get_other_person_from_match(person.user_id,
             latest_match)
         send_dm(person.user_id, text=messages.ASK_IF_MET.format(
-            other_person=other_person, 
-            start_date=latest_match.round.start_date.strftime(date_format)))
+            other_person=other_person, pool=pool))
         person.last_query = QUESTIONS["met"]
+        person.last_query_pool = pool
         person.save()
     return HttpResponse(204)
 
@@ -173,6 +186,7 @@ def update_met(event, person):
     match.met = met
     match.save()
     person.last_query = None
+    person.last_query_pool = None
     person.save()
     logger.info(f"Updated match \"{match}\" \"met\" value to {match.met}.")
     if met:

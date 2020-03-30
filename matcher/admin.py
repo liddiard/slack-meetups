@@ -10,7 +10,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import GroupAdmin
 from django.http import HttpResponse
 
-from .models import Pool, Person, Round, Match
+from .models import Pool, Person, PoolMembership, Round, Match
 from .utils import group
 
 
@@ -29,6 +29,20 @@ class IntroListFilter(admin.SimpleListFilter):
             return queryset.exclude(intro="")
         if self.value() == "no":
             return queryset.filter(intro="")
+
+
+class AvailabilityListFilter(admin.SimpleListFilter):
+    title = "available for pool"
+    parameter_name = "available_for_pool"
+
+    def lookups(self, request, model_admin):
+        return tuple((pool.pk, pool.name) for pool in Pool.objects.all())
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        else:
+            return queryset.filter(pools=self.value(), poolmembership__available=True)
 
 
 class MatcherAdmin(admin.AdminSite):
@@ -56,11 +70,25 @@ class PoolAdmin(admin.ModelAdmin):
 
 @admin.register(Person, site=ADMIN_SITE)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ("user_name", "full_name", "available", "has_intro",
-        "joined")
-    list_filter = (IntroListFilter, "available", "pools")
+    list_display = ("user_name", "full_name", "has_intro", "joined")
+    # "pools" cannot be display as an editable field here because of the
+    # custom "through" model on the many-to-many relation
+    readonly_fields = ("pools", "joined", "last_query", "last_query_pool")
+    list_filter = (IntroListFilter, "pools", AvailabilityListFilter)
     ordering = ("-joined",)
     search_fields = ("user_name", "full_name", "casual_name")
+
+
+@admin.register(PoolMembership, site=ADMIN_SITE)
+class PoolMembershipAdmin(admin.ModelAdmin):
+    list_display = ("person", "pool", "available", "get_has_intro")
+    list_filter = ("pool", "available")
+    search_fields = ("person__user_name", "person__full_name")
+
+    def get_has_intro(self, pool_membership):
+        return pool_membership.person.has_intro()
+    get_has_intro.short_description = "Has intro"
+    get_has_intro.boolean = True
 
 
 @admin.register(Round, site=ADMIN_SITE)
@@ -81,9 +109,10 @@ class MatchAdmin(admin.ModelAdmin):
     list_display = ("person_1", "person_2", "get_round_pool",
         "get_round_start_date", "met")
     list_display_links = ("person_1", "person_2")
-    list_filter = ("met", "round")
+    list_filter = ("round__pool", "met")
     ordering = ("-round__start_date",)
-    search_fields = ("person_1__user_name", "person_2__user_name")
+    search_fields = ("person_1__user_name", "person_1__full_name",
+        "person_2__user_name", "person_2__full_name")
 
     def get_round_pool(self, match):
         return match.round.pool
@@ -117,7 +146,8 @@ def match(round):
             "matches for this round first.")
     # randomly order the people for random matching
     # note: this can be a slow query for large tables
-    people_to_match = Person.objects.filter(pools=round.pool, available=True)\
+    people_to_match = Person.objects\
+        .filter(pools=round.pool, poolmembership__available=True)\
         .order_by("?")
     logger.info(f"Starting matching for round \"{round}\" with "
         f"{len(people_to_match)} participants.")
