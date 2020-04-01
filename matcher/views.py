@@ -104,7 +104,7 @@ def update_intro(event):
         )
         logger.info(f"Received query from unregistered user {user_id}: "\
             f"\"{message_text}\".")
-        send_dm(user_id,
+        send_dm.delay(user_id,
             text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
         return HttpResponse(204)
     # if this person has an intro already, we aren't expecting any further
@@ -116,7 +116,7 @@ def update_intro(event):
         else:
             contact_phrase = "."
         logger.info(f"Received unknown query from {person}: \"{message_text}\".")
-        send_dm(user_id, 
+        send_dm.delay(user_id,
             text=messages.UNKNOWN_QUERY.format(contact_phrase=contact_phrase))
     else:
         # onboard new Person
@@ -131,7 +131,7 @@ def update_intro(event):
         if ADMIN_SLACK_USER_ID:
             message += (" " + messages.INTRO_RECEIVED_QUESTIONS\
                 .format(ADMIN_SLACK_USER_ID=ADMIN_SLACK_USER_ID))
-        send_dm(user_id, text=message)
+        send_dm.delay(user_id, text=message)
     return HttpResponse(204)
 
 
@@ -170,7 +170,7 @@ def update_availability(payload, action, pool_id):
     else:
         message = messages.UPDATED_UNAVAILABLE
     logger.info(f"Set the availability of {person} in {pool} to {available}.")
-    send_dm(user_id, text=message)
+    send_dm.delay(user_id, text=message)
     ask_if_met(user_id, pool)
     return HttpResponse(204)
 
@@ -197,7 +197,7 @@ def ask_if_met(user_id, pool):
             latest_match.id,
             {"pool": pool, "other_person": other_person}
         )
-        send_dm(user_id, blocks=blocks)
+        send_dm.delay(user_id, blocks=blocks)
     return HttpResponse(204)
 
 
@@ -241,5 +241,5 @@ def update_met(payload, action, block_id):
         message = messages.MET.format(other_person=other_person)
     else:
         message = messages.DID_NOT_MEET
-    send_dm(user_id, text=message)
+    send_dm.delay(user_id, text=message)
     return HttpResponse(204)

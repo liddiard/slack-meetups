@@ -5,7 +5,7 @@ import pytz
 from django.db import models
 
 import matcher.messages as messages
-from .slack import client, send_dm
+from .slack import client, send_dm, open_match_dm
 
 
 logger = logging.getLogger(__name__)
@@ -159,10 +159,11 @@ class Match(models.Model):
         verbose_name_plural = "matches"
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            # automatically send matching message when a match is created
-            open_match_dm(self)
+        create = not bool(self.pk)
         super(Match, self).save(*args, **kwargs)
+        if create:
+            # automatically send matching message when a match is created
+            open_match_dm.delay(self.pk)
 
     def __str__(self):
         return f"{self.person_1} ↔ {self.person_2} for round “{self.round}”"
@@ -181,7 +182,7 @@ def ask_availability(round):
             pool.id,
             {"person": person, "pool": pool}
         )
-        send_dm(person.user_id, blocks=blocks)
+        send_dm.delay(person.user_id, blocks=blocks)
     
     pool = round.pool
     channel_members = get_channel_members(pool.channel_id)
@@ -220,7 +221,13 @@ def ask_availability(round):
         except Person.DoesNotExist:
             # get the user's Slack profile
             # https://api.slack.com/methods/users.info
-            user = client.users_info(user=user_id)
+            try:
+                user = client.users_info(user=user_id)
+            except Exception as exception: # see note [1] in ./slack.py
+                logger.error(f"Failed to retrieve Slack user info and create "
+                    f"Person for new user ID:  {user_id}. Error: {exception}."
+                    f" You probably want to delete and recreate this round.")
+                continue
             # don't add a Person if the user is a bot
             if user["user"]["is_bot"]:
                 continue
@@ -228,7 +235,7 @@ def ask_availability(round):
                 # keys on "profile" are not guaranteed to exist
                 full_name = user["user"]["profile"]["real_name"]
             except KeyError:
-                send_dm(user_id, messages.PERSON_MISSING_NAME)
+                send_dm.delay(user_id, text=messages.PERSON_MISSING_NAME)
                 logger.warning("Slack \"real_name\" field missing for user: "
                     f"{user_id}")
                 continue
@@ -238,18 +245,18 @@ def ask_availability(round):
             person.save()
             PoolMembership.objects.create(person=person, pool=pool)
             logger.info(f"Added {person} to pool \"{pool}\".")
-            send_dm(user_id, 
+            send_dm.delay(user_id,
                 text=messages.WELCOME_INTRO.format(person=person, pool=pool))
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 
 def get_channel_members(channel_id, limit=200):
     """get members from a Slack channel, using pagination as necessary
-    https://api.slack.com/methods/conversations.members
     """
     members = []
     cursor = ""
     while True:
+        # https://api.slack.com/methods/conversations.members
         response = client.conversations_members(channel=channel_id,
             cursor=cursor, limit=limit)
         members += response.get("members", [])
@@ -258,22 +265,3 @@ def get_channel_members(channel_id, limit=200):
             break
     return members
 
-
-def open_match_dm(self):
-    """create a group direct message between the two people in a match and
-    introduce them to each other
-    """
-    user_ids = ",".join([self.person_1.user_id, self.person_2.user_id])
-    response = client.conversations_open(users=user_ids)
-    try:
-        self.conversation_id = response["channel"]["id"]
-    except KeyError:
-        return logger.error(f"Failed to create conversation for match between"
-            f" {self.person_1} and {self.person_2}.")
-    # send people's introductions to each other in the channel
-    # `unfurl_links=False` prevents link previews from appearing if someone
-    # included a link in their intro
-    client.chat_postMessage(channel=self.conversation_id, as_user=True,
-        text=messages.MATCH_INTRO.format(person_1=self.person_1,
-        person_2=self.person_2, pool=self.round.pool), unfurl_links=False)
-    logger.info(f"Sent matching messages for match: {self}.")
