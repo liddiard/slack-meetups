@@ -1,3 +1,5 @@
+import re
+
 # http://code.activestate.com/recipes/303060-group-a-list-into-sequential-n-tuples/
 def group(lst, n):
     """group a list into consecutive n-tuples
@@ -35,3 +37,19 @@ def get_other_person_from_match(user_id, match):
     else:
         raise Exception(f"Person with user ID \"{user_id}\" is not part of "
             f"the passed match ({match}).")
+
+def get_at_mention(message):
+    """Extract the first user ID from an @-mention in a message's text, if any
+    """
+    pattern = "<@(.*?)>" # e.g. "<@UJQ07L30Q>"
+    match = re.search(pattern, message)
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def remove_at_mention(message):
+    """Remove the first @-mention from a message, if any
+    """
+    pattern = "\s?<@.*?>\s?" # e.g. " <@UJQ07L30Q> "
+    return re.sub(pattern, "", message, count=1)

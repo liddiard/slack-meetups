@@ -9,7 +9,8 @@ from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .middleware import VerifySlackRequest
 from .models import Person, Match, Pool, PoolMembership
 from .slack import  send_dm
-from .utils import get_person_from_match, get_other_person_from_match
+from .utils import (get_person_from_match, get_other_person_from_match,
+    get_at_mention, remove_at_mention)
 
 
 logger = logging.getLogger(__name__)
@@ -28,20 +29,27 @@ def handle_slack_message(request):
     except ValueError:
         return JsonResponse(status=400, 
             data={"error": "request body is not valid JSON"})
+    event = req.get("event", {})
     # To verify our app's URL, Slack sends a POST JSON payload with a 
     # "challenge" parameter with which the app must respond to verify it.
     # Only allow this in debug mode.
     if DEBUG and req.get("challenge"):
         return JsonResponse(req)
-    event_type = req.get("event", {}).get("type")
+    event_type = event.get("type")
     if event_type != "message":
         return JsonResponse(status=400, 
             data={"error": f"invalid event type \"{event_type}\""})
     # Ignore messages from bots so the bot doesn't get stuck in an infinite
     # conversation loop with itself.
-    bot_id = req.get("event", {}).get("bot_id")
+    bot_id = event.get("bot_id")
     if bot_id:
         return HttpResponse(204)
+    # If the message sent was from the admin and they're @-mentioning someone,
+    # send a message to that Slack user from the bot.
+    message_sender = event.get("user")
+    message_text = event.get("text")
+    if message_sender == ADMIN_SLACK_USER_ID and get_at_mention(message_text):
+	    return send_message_as_bot(message_text)
     # Currently the only free-text (as opposed to action blocks) message we
     # expect from the user is their intro. If we wanted to support more text
     # messages in the future, we'd have to store the last sent message type on
@@ -97,27 +105,15 @@ def update_intro(event):
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
-        # user is unregistered, send an informational message
-        pools = Pool.objects.all()
-        channels_list = "\n".join(
-            [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
-        )
-        logger.info(f"Received query from unregistered user {user_id}: "\
-            f"\"{message_text}\".")
-        send_dm.delay(user_id,
-            text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
-        return HttpResponse(204)
+        # user is not registered with the bot
+        return handle_unknown_message(user_id, message_text)
     # if this person has an intro already, we aren't expecting any further
     # messages from them. send them a message telling them how to reach out
     # if they have questions
     if person.intro:
-        if ADMIN_SLACK_USER_ID:
-            contact_phrase = f", <@{ADMIN_SLACK_USER_ID}>."
-        else:
-            contact_phrase = "."
-        logger.info(f"Received unknown query from {person}: \"{message_text}\".")
-        send_dm.delay(user_id,
-            text=messages.UNKNOWN_QUERY.format(contact_phrase=contact_phrase))
+        # user has registered and has an intro, so the bot is not expecting
+        # any particular message from them
+        return handle_unknown_message(user_id, message_text)
     else:
         # onboard new Person
         person.intro = message_text
@@ -132,7 +128,7 @@ def update_intro(event):
             message += (" " + messages.INTRO_RECEIVED_QUESTIONS\
                 .format(ADMIN_SLACK_USER_ID=ADMIN_SLACK_USER_ID))
         send_dm.delay(user_id, text=message)
-    return HttpResponse(204)
+        return HttpResponse(204)
 
 
 def update_availability(payload, action, pool_id):
@@ -242,4 +238,29 @@ def update_met(payload, action, block_id):
     else:
         message = messages.DID_NOT_MEET
     send_dm.delay(user_id, text=message)
+    return HttpResponse(204)
+
+
+def handle_unknown_message(user_id, message):
+    """If the bot receives a message it doesn't know how to deal with, send it
+    a direct message to the admin, if defined, otherwise respond with a
+    generic "Sorry I don't know how to help you" type of message
+    """
+    logger.info(f"Received unknown query from {user_id}: \"{message}\".")
+    if ADMIN_SLACK_USER_ID:
+        send_dm.delay(ADMIN_SLACK_USER_ID,
+            text=messages.UNKNOWN_MESSAGE_ADMIN.format(user_id=user_id,
+            message=message))
+    else:
+        send_dm.delay(user_id, text=messages.UNKNOWN_MESSAGE_NO_ADMIN)
+    return HttpResponse(204)
+
+
+def send_message_as_bot(message):
+    """Send a message to the first user @-mentioned in message as the bot
+    """
+    user_id = get_at_mention(message)
+    message = remove_at_mention(message)
+    send_dm.delay(user_id, text=message)
+    logger.info(f"Sent message to {user_id} as bot: \"{message}\".")
     return HttpResponse(204)

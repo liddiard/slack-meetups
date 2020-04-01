@@ -131,7 +131,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 
 ### Configuring the web server
 
-1. Create and set required environment variables in your environment: `SECRET_KEY` (required; a long random string for Django's cryptography), `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-"), `SLACK_SIGNING_SECRET` (required; used to verify that requests are from Slack), `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who people should contact if they have questions)
+1. Create and set required environment variables in your environment: `SECRET_KEY` (required; a long random string for Django's cryptography), `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-"), `SLACK_SIGNING_SECRET` (required; used to verify that requests are from Slack), `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who will be messaged if the bot receives a message it doesn't know how to act on)
 2. `python manage.py collectstatic` to move static files for serving
 3. `python manage.py makemigrations` to set up migrations to create the database tables
 5. `python manage.py migrate` to create the database tables
