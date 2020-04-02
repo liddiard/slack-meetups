@@ -1,8 +1,9 @@
 {
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
-      "--load-plugins",
-      "pylint_django"
-    ]
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintArgs": [
+    "--load-plugins",
+    "pylint_django"
+  ],
+  "python.pythonPath": "~/Developer/slack-meetups/bin/python3"
 }

@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .models import Person, Match, Pool, PoolMembership
-from .slack import  send_dm
+from .tasks import  send_dm, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
     get_at_mention, remove_at_mention, determine_yes_no_answer)
 from .constants import QUESTIONS
@@ -25,7 +25,7 @@ def handle_slack_message(request):
     try:
         event = json.loads(request.body)
     except ValueError:
-        return JsonResponse(status=400, 
+        return JsonResponse(status=400,
             data={"error": "request body is not valid JSON"})
     # To verify our app's URL, Slack sends a POST JSON payload with a
     # "challenge" parameter with which the app must respond to verify it.
@@ -34,7 +34,7 @@ def handle_slack_message(request):
         return JsonResponse(event)
     event_type = event.get("type")
     if event_type != "message":
-        return JsonResponse(status=400, 
+        return JsonResponse(status=400,
             data={"error": f"invalid event type \"{event_type}\""})
     # Ignore messages from bots so the bot doesn't get stuck in an infinite
     # conversation loop with itself.
@@ -46,7 +46,7 @@ def handle_slack_message(request):
     message_sender = event.get("user")
     message_text = event.get("text")
     if message_sender == ADMIN_SLACK_USER_ID and get_at_mention(message_text):
-	    return send_message_as_bot(message_text)
+        return send_message_as_bot(message_text)
     # Currently the only free-text (as opposed to action blocks) message we
     # expect from the user is their intro. If we wanted to support more text
     # messages in the future, we'd have to store the last sent message type on
@@ -77,7 +77,7 @@ def handle_slack_message(request):
 
 
 def update_intro(event, person):
-    """update a Person's intro with the message text they send, or if the 
+    """update a Person's intro with the message text they send, or if the
     person already has an intro, send a default message
     """
     user_id = event.get("user")
@@ -108,7 +108,7 @@ def update_availability(event, person):
         available = determine_yes_no_answer(message_text)
     except ValueError:
         logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
-        send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
+        send_dm.delay(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
     pool = person.last_query_pool
     try:
@@ -124,36 +124,8 @@ def update_availability(event, person):
         message = messages.UPDATED_AVAILABLE
     else:
         message = messages.UPDATED_UNAVAILABLE
-    send_dm.delay(person.user_id, text=message)
-    ask_if_met(person, pool)
-    return HttpResponse(204)
-
-
-def ask_if_met(person, pool):
-    """ask this person if they met up with their last match (if any)
-    """
-    # ask this person if they met up with their last match in this pool, if 
-    # any, and if we don't know yet
-    # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (
-        Match.objects.filter(round__pool=pool, person_1=person) |
-        Match.objects.filter(round__pool=pool, person_2=person)
-    )
-    if not user_matches:
-        # if the Person hasn't matched with anyone yet, skip sending this
-        # message
-        return HttpResponse(204)
-    latest_match = user_matches.latest("round__end_date")
-    # if the Person or their match hasn't already provided feedback on their
-    # last match, continue to ask if they met
-    if latest_match.met is None:
-        other_person = get_other_person_from_match(person.user_id,
-            latest_match)
-        send_dm.delay(person.user_id, text=messages.ASK_IF_MET.format(
-            other_person=other_person, pool=pool))
-        person.last_query = QUESTIONS["met"]
-        person.last_query_pool = pool
-        person.save()
+    (send_dm.s(person.user_id, text=message) |
+     ask_if_met.s(person.user_id, pool.pk)).delay()
     return HttpResponse(204)
 
 
@@ -165,7 +137,7 @@ def update_met(event, person):
         met = determine_yes_no_answer(message_text)
     except ValueError:
         logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
-        send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
+        send_dm.delay(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
     pool = person.last_query_pool
     # a Person can be either `person_1` or `person_2` on a Match; it's random
