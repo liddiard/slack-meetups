@@ -2,32 +2,34 @@ import os
 import logging
 from random import random
 
+from django.http import HttpResponse
+
 import slack
 from celery import Celery
 
-from meetups import settings
 import matcher.messages as messages
+from meetups import settings
+from .utils import get_other_person_from_match
+
 
 # Note: The Celery worker requires this environment variable to be set in this
-# file for the `open_match_dm` task to work, or it will raise exception:
-# "django.core.exceptions.ImproperlyConfigured: Requested setting
-# INSTALLED_APPS, but settings are not configured. You must either define the
-# environment variable DJANGO_SETTINGS_MODULE or call settings.configure()
-# before accessing settings."
-# I am not 100% sure why, but I suspect it is because of the dynamic import in
-# that task.
-os.environ["DJANGO_SETTINGS_MODULE"] = "meetups.settings"
+# file, see
+# https://github.com/celery/django-celery-results/issues/11#issuecomment-268799771
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meetups.settings")
+
+
+logger = logging.getLogger(__name__)
+client = slack.WebClient(token=settings.SLACK_API_TOKEN)
+
+# maximum time to wait before retrying a request in seconds
+MAX_WAIT_TIME = 60 * 2
 
 # Celery setup
 app = Celery("tasks", broker=settings.CELERY_BROKER_URL)
 # how many times to retry a request
 # https://github.com/celery/celery/issues/976#issuecomment-233663171
 app.Task.max_retries = 5
-# maximum time to wait before retrying a request in seconds
-MAX_WAIT_TIME = 60 * 2
 
-logger = logging.getLogger(__name__)
-client = slack.WebClient(token=settings.SLACK_API_TOKEN)
 
 
 def get_wait_time(exception, request):
@@ -102,6 +104,39 @@ def open_match_dm(self, match_id):
         raise self.retry(exc=exception, countdown=wait_time)
     logger.info(f"Sent message for match: {match}.")
     return match # logged to Celery worker
+
+
+@app.task
+def ask_if_met(_, user_id, pool_id):
+    """ask this person if they met up with their last match in this pool, if
+    any, and if we don't know yet
+    """
+    # import within the function to avoid a circular ImportError
+    import matcher.models as models
+    Match = models.Match
+    pool = models.Pool.objects.get(pk=pool_id)
+    # a Person can be either `person_1` or `person_2` on a Match; it's random
+    user_matches = (
+        Match.objects.filter(round__pool=pool, person_1__user_id=user_id) |
+        Match.objects.filter(round__pool=pool, person_2__user_id=user_id)
+    )
+    if not user_matches:
+        # if the Person hasn't matched with anyone yet, skip sending this
+        # message
+        return HttpResponse(204)
+    latest_match = user_matches.latest("round__end_date")
+    print("latest_match", latest_match, latest_match.met)
+    # if the Person or their match hasn't already provided feedback on their
+    # last match, continue to ask if they met
+    if latest_match.met is None:
+        other_person = get_other_person_from_match(user_id, latest_match)
+        blocks = messages.format_block_text(
+            "ASK_IF_MET",
+            latest_match.id,
+            {"pool": pool, "other_person": other_person}
+        )
+        send_dm.delay(user_id, blocks=blocks)
+    return HttpResponse(204)
 
 
 # [1]: It's a bit of an antipattern to catch all exceptions in Python. The

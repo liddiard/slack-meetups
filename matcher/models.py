@@ -5,7 +5,7 @@ import pytz
 from django.db import models
 
 import matcher.messages as messages
-from .slack import client, send_dm, open_match_dm
+from .tasks import client, send_dm, open_match_dm
 
 
 logger = logging.getLogger(__name__)
@@ -223,7 +223,7 @@ def ask_availability(round):
             # https://api.slack.com/methods/users.info
             try:
                 user = client.users_info(user=user_id)
-            except Exception as exception: # see note [1] in ./slack.py
+            except Exception as exception: # see note [1] in ./tasks.py
                 logger.error(f"Failed to retrieve Slack user info and create "
                     f"Person for new user ID:  {user_id}. Error: {exception}."
                     f" You probably want to delete and recreate this round.")

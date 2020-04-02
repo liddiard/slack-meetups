@@ -8,7 +8,7 @@ import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .middleware import VerifySlackRequest
 from .models import Person, Match, Pool, PoolMembership
-from .slack import  send_dm
+from .tasks import  send_dm, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
     get_at_mention, remove_at_mention)
 
@@ -27,17 +27,17 @@ def handle_slack_message(request):
     try:
         req = json.loads(request.body)
     except ValueError:
-        return JsonResponse(status=400, 
+        return JsonResponse(status=400,
             data={"error": "request body is not valid JSON"})
     event = req.get("event", {})
-    # To verify our app's URL, Slack sends a POST JSON payload with a 
+    # To verify our app's URL, Slack sends a POST JSON payload with a
     # "challenge" parameter with which the app must respond to verify it.
     # Only allow this in debug mode.
     if DEBUG and req.get("challenge"):
         return JsonResponse(req)
     event_type = event.get("type")
     if event_type != "message":
-        return JsonResponse(status=400, 
+        return JsonResponse(status=400,
             data={"error": f"invalid event type \"{event_type}\""})
     # Ignore messages from bots so the bot doesn't get stuck in an infinite
     # conversation loop with itself.
@@ -49,7 +49,7 @@ def handle_slack_message(request):
     message_sender = event.get("user")
     message_text = event.get("text")
     if message_sender == ADMIN_SLACK_USER_ID and get_at_mention(message_text):
-	    return send_message_as_bot(message_text)
+        return send_message_as_bot(message_text)
     # Currently the only free-text (as opposed to action blocks) message we
     # expect from the user is their intro. If we wanted to support more text
     # messages in the future, we'd have to store the last sent message type on
@@ -59,7 +59,7 @@ def handle_slack_message(request):
 
 @decorator_from_middleware(VerifySlackRequest)
 def handle_slack_action(request):
-    """validate that an incoming Slack action is well-formed enough to 
+    """validate that an incoming Slack action is well-formed enough to
     continue processing, and if so send to its appropriate handler function
     """
     # map action names (stored on their respective blocks) to handler functions
@@ -97,7 +97,7 @@ def handle_slack_action(request):
 
 
 def update_intro(event):
-    """update a Person's intro with the message text they send, or if the 
+    """update a Person's intro with the message text they send, or if the
     person already has an intro, send a default message
     """
     user_id = event.get("user")
@@ -166,38 +166,12 @@ def update_availability(payload, action, pool_id):
     else:
         message = messages.UPDATED_UNAVAILABLE
     logger.info(f"Set the availability of {person} in {pool} to {available}.")
-    send_dm.delay(user_id, text=message)
-    ask_if_met(user_id, pool)
+    (send_dm.s(user_id, text=message) |
+     ask_if_met.s(user_id, pool.pk)).delay()
     return HttpResponse(204)
 
 
-def ask_if_met(user_id, pool):
-    # ask this person if they met up with their last match in this pool, if 
-    # any, and if we don't know yet
-    # a Person can be either `person_1` or `person_2` on a Match; it's random
-    user_matches = (
-        Match.objects.filter(round__pool=pool, person_1__user_id=user_id) |
-        Match.objects.filter(round__pool=pool, person_2__user_id=user_id)
-    )
-    if not user_matches:
-        # if the Person hasn't matched with anyone yet, skip sending this 
-        # message
-        return HttpResponse(204)
-    latest_match = user_matches.latest("round__end_date")
-    # if the Person or their match hasn't already provided feedback on their
-    # last match, continue to ask if they met
-    if latest_match.met is None:
-        other_person = get_other_person_from_match(user_id, latest_match)
-        blocks = messages.format_block_text(
-            "ASK_IF_MET", 
-            latest_match.id,
-            {"pool": pool, "other_person": other_person}
-        )
-        send_dm.delay(user_id, blocks=blocks)
-    return HttpResponse(204)
-
-
-def update_met(payload, action, block_id):
+def update_met(payload, action, match_id):
     """update a Match's `met` status with the provided yes/no answer
     """
     if action.get("value") == "yes":
@@ -213,16 +187,17 @@ def update_met(payload, action, block_id):
         return JsonResponse(status=400,
             data={"error": "request payload is missing user ID"})
     # a Person can be either `person_1` or `person_2` on a Match; it's random
+    # filter to prevent a user from chaging a Match they were not part of
     user_matches = (
-        Match.objects.filter(round__pool=pool, person_1__user_id=user_id) |
-        Match.objects.filter(round__pool=pool, person_2__user_id=user_id)
+        Match.objects.filter(person_1__user_id=user_id) |
+        Match.objects.filter(person_2__user_id=user_id)
     )
     try:
-        match = user_matches.get(id=block_id)
+        match = user_matches.get(id=match_id)
     except Match.DoesNotExist:
         return JsonResponse(status=404, 
             data={"error": f"match for user \"{user_id}\" with ID "
-                f"\"{block_id}\" does not exist"})
+                f"\"{match_id}\" does not exist"})
     # variables used in message string
     person = get_person_from_match(user_id, match)
     other_person = get_other_person_from_match(user_id, match)
