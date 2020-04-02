@@ -160,9 +160,6 @@ CELERY_BROKER_URL = "pyamqp://guest@localhost//"
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
 SLACK_API_TOKEN = os.environ["SLACK_API_TOKEN"]
 
-# signing secret comes from this page: https://api.slack.com/apps/AH99D6ZLH
-SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
-
 # Slack user ID of the admin for this Slack application who users should reach
 # out to if they have questions
 ADMIN_SLACK_USER_ID = os.getenv("ADMIN_SLACK_USER_ID")
