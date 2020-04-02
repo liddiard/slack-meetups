@@ -8,9 +8,9 @@ import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .middleware import VerifySlackRequest
 from .models import Person, Match, Pool, PoolMembership
-from .tasks import  send_dm, ask_if_met
+from .tasks import  send_msg, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
-    get_at_mention, remove_at_mention)
+                    get_mention, remove_mention)
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ def handle_slack_message(request):
     # send a message to that Slack user from the bot.
     message_sender = event.get("user")
     message_text = event.get("text")
-    if message_sender == ADMIN_SLACK_USER_ID and get_at_mention(message_text):
+    if message_sender == ADMIN_SLACK_USER_ID and get_mention(message_text):
         return send_message_as_bot(message_text)
     # Currently the only free-text (as opposed to action blocks) message we
     # expect from the user is their intro. If we wanted to support more text
@@ -127,7 +127,7 @@ def update_intro(event):
         if ADMIN_SLACK_USER_ID:
             message += (" " + messages.INTRO_RECEIVED_QUESTIONS\
                 .format(ADMIN_SLACK_USER_ID=ADMIN_SLACK_USER_ID))
-        send_dm.delay(user_id, text=message)
+        send_msg.delay(user_id, text=message)
         return HttpResponse(204)
 
 
@@ -168,7 +168,7 @@ def update_availability(payload, action, pool_id):
         message = messages.UPDATED_UNAVAILABLE
     # perform tasks in sequence to avoid a race condition between the messages
     # https://docs.celeryproject.org/en/4.4.2/userguide/canvas.html#chains
-    (send_dm.s(user_id, text=message) |
+    (send_msg.s(user_id, text=message) |
      ask_if_met.s(user_id, pool.pk)).delay()
     return HttpResponse(204)
 
@@ -214,7 +214,7 @@ def update_met(payload, action, match_id):
         message = messages.MET.format(other_person=other_person)
     else:
         message = messages.DID_NOT_MEET
-    send_dm.delay(user_id, text=message)
+    send_msg.delay(user_id, text=message)
     return HttpResponse(204)
 
 
@@ -225,19 +225,20 @@ def handle_unknown_message(user_id, message):
     """
     logger.info(f"Received unknown query from {user_id}: \"{message}\".")
     if ADMIN_SLACK_USER_ID:
-        send_dm.delay(ADMIN_SLACK_USER_ID,
+        send_msg.delay(ADMIN_SLACK_USER_ID,
             text=messages.UNKNOWN_MESSAGE_ADMIN.format(user_id=user_id,
             message=message))
     else:
-        send_dm.delay(user_id, text=messages.UNKNOWN_MESSAGE_NO_ADMIN)
+        send_msg.delay(user_id, text=messages.UNKNOWN_MESSAGE_NO_ADMIN)
     return HttpResponse(204)
 
 
 def send_message_as_bot(message):
     """Send a message to the first user @-mentioned in message as the bot
     """
-    user_id = get_at_mention(message)
-    message = remove_at_mention(message)
-    send_dm.delay(user_id, text=message)
-    logger.info(f"Sent message to {user_id} as bot: \"{message}\".")
+    channel_id = get_mention(message)
+    message = remove_mention(message)
+    if message: # don't try to send an empty message
+        send_msg.delay(channel_id, text=message)
+        logger.info(f"Sent message to {channel_id} as bot: \"{message}\".")
     return HttpResponse(204)

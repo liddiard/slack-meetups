@@ -5,7 +5,7 @@ import pytz
 from django.db import models
 
 import matcher.messages as messages
-from .tasks import client, send_dm, open_match_dm
+from .tasks import client, send_msg, open_match_dm
 
 
 logger = logging.getLogger(__name__)
@@ -182,7 +182,7 @@ def ask_availability(round):
             pool.id,
             {"person": person, "pool": pool}
         )
-        send_dm.delay(person.user_id, blocks=blocks)
+        send_msg.delay(person.user_id, blocks=blocks)
     
     pool = round.pool
     channel_members = get_channel_members(pool.channel_id)
@@ -235,7 +235,7 @@ def ask_availability(round):
                 # keys on "profile" are not guaranteed to exist
                 full_name = user["user"]["profile"]["real_name"]
             except KeyError:
-                send_dm.delay(user_id, text=messages.PERSON_MISSING_NAME)
+                send_msg.delay(user_id, text=messages.PERSON_MISSING_NAME)
                 logger.warning("Slack \"real_name\" field missing for user: "
                     f"{user_id}")
                 continue
@@ -245,7 +245,7 @@ def ask_availability(round):
             person.save()
             PoolMembership.objects.create(person=person, pool=pool)
             logger.info(f"Added {person} to pool \"{pool}\".")
-            send_dm.delay(user_id,
+            send_msg.delay(user_id,
                 text=messages.WELCOME_INTRO.format(person=person, pool=pool))
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
