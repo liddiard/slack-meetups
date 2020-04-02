@@ -124,6 +124,8 @@ def update_availability(event, person):
         message = messages.UPDATED_AVAILABLE
     else:
         message = messages.UPDATED_UNAVAILABLE
+    # perform tasks in sequence to avoid a race condition between the messages
+    # https://docs.celeryproject.org/en/4.4.2/userguide/canvas.html#chains
     (send_dm.s(person.user_id, text=message) |
      ask_if_met.s(person.user_id, pool.pk)).delay()
     return HttpResponse(204)
