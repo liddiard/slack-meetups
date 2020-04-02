@@ -161,11 +161,11 @@ def update_availability(payload, action, pool_id):
                 f"{pool} and person: {person}"})
     pool_membership.available = available
     pool_membership.save()
+    logger.info(f"Set the availability of {person} in {pool} to {available}.")
     if available:
         message = messages.UPDATED_AVAILABLE
     else:
         message = messages.UPDATED_UNAVAILABLE
-    logger.info(f"Set the availability of {person} in {pool} to {available}.")
     # perform tasks in sequence to avoid a race condition between the messages
     # https://docs.celeryproject.org/en/4.4.2/userguide/canvas.html#chains
     (send_dm.s(user_id, text=message) |
