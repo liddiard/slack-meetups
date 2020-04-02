@@ -54,19 +54,19 @@ def get_retries_remaining(self):
 
 
 @app.task(bind=True)
-def send_dm(self, user_id, **kwargs):
-    """send a direct message to a user as the bot
+def send_msg(self, channel_id, **kwargs):
+    """send a message to a user or channel as the bot
     """
     message_text = kwargs.get("text", kwargs.get("blocks"))
     try:
-        client.chat_postMessage(channel=user_id, as_user=True, **kwargs)
+        client.chat_postMessage(channel=channel_id, as_user=True, **kwargs)
     except Exception as exception: # see [1] (bottom of file)
         wait_time = get_wait_time(exception, self.request)
-        logger.warning(f"Failed to send message \"{message_text}\" to user "
-            f"{user_id}. Retrying in {wait_time} seconds. Error: "
+        logger.warning(f"Failed to send message \"{message_text}\" to "
+            f"{channel_id}. Retrying in {wait_time} seconds. Error: "
             f"{exception}. {get_retries_remaining(self)} retries remaining.")
         raise self.retry(exc=exception, countdown=wait_time)
-    return f"{user_id}: \"{message_text}\"" # logged to Celery worker
+    return f"{channel_id}: \"{message_text}\"" # logged to Celery worker
 
 
 @app.task(bind=True)
@@ -132,7 +132,7 @@ def ask_if_met(_, user_id, pool_id):
     if latest_match.met is None:
         other_person = get_other_person_from_match(person.user_id,
             latest_match)
-        send_dm.delay(person.user_id, text=messages.ASK_IF_MET.format(
+        send_msg.delay(person.user_id, text=messages.ASK_IF_MET.format(
             other_person=other_person, pool=pool))
         person.last_query = QUESTIONS["met"]
         person.last_query_pool = pool

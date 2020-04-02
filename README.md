@@ -147,7 +147,7 @@ After installing RabbitMQ (see Prerequisites above), do the following:
 
 1. Start the RabbitMQ broker by running `rabbitmq-server`
 2. In a separate terminal window, source the virtualenv with the command `source bin/activate` (or whatever the path to the `activate` script is)
-3. Start the Celery task queue: `celery -A matcher.slack worker --loglevel=info`
+3. Start the Celery task queue: `celery -A matcher.tasks worker --loglevel=info`
 
 ## TODO
 

@@ -1,5 +1,12 @@
 import re
 
+
+# regex for a user or channel mention at the beginning of a message
+# example matches: " <@UJQ07L30Q> ", "<#C010P8N1ABB|interns>"
+# interactive playground: https://regex101.com/r/2Z7eun/2
+MENTION_PATTERN = r"(?:^\s?<@(.*?)>\s?)|(?:^\s?<#(.*?)\|.*?>\s?)"
+
+
 # http://code.activestate.com/recipes/303060-group-a-list-into-sequential-n-tuples/
 def group(lst, n):
     """group a list into consecutive n-tuples
@@ -15,6 +22,7 @@ def group(lst, n):
             f"divisible by {n}")
     return zip(*[lst[i::n] for i in range(n)]) 
 
+
 def get_person_from_match(user_id, match):
     """given a Match, return the Person corresponding to the passed user ID
     """
@@ -25,6 +33,7 @@ def get_person_from_match(user_id, match):
     else:
         raise Exception(f"Person with user ID \"{user_id}\" is not part of "
             f"the passed match ({match}).")
+
 
 def get_other_person_from_match(user_id, match):
     """given a Match, return the Person corresponding to the user who is NOT
@@ -67,18 +76,23 @@ def determine_yes_no_answer(message):
     else:
         return yes_response
 
-def get_at_mention(message):
-    """Extract the first user ID from an @-mention in a message's text, if any
+
+def get_mention(message):
+    """get the user or channel ID mentioned at the beginning of a message, if
+    any
     """
-    pattern = "<@(.*?)>" # e.g. "<@UJQ07L30Q>"
-    match = re.search(pattern, message)
+    match = re.search(MENTION_PATTERN, message)
     if match:
-        return match.group(1)
+        # return the first not-None value in the match group tuple, be it a
+        # user or channel mention
+        # https://stackoverflow.com/a/18533669
+        return next(group for group in match.group(1, 2) if group is not None)
     else:
         return None
 
-def remove_at_mention(message):
-    """Remove the first @-mention from a message, if any
+
+def remove_mention(message):
+    """remove the user or channel mention from the beginning of a message, if
+    any
     """
-    pattern = "\s?<@.*?>\s?" # e.g. " <@UJQ07L30Q> "
-    return re.sub(pattern, "", message, count=1)
+    return re.sub(MENTION_PATTERN, "", message, count=1)

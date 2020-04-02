@@ -5,7 +5,7 @@ import pytz
 from django.db import models
 
 import matcher.messages as messages
-from .tasks import client, send_dm, open_match_dm
+from .tasks import client, send_msg, open_match_dm
 from .constants import QUESTIONS
 
 
@@ -193,7 +193,7 @@ def ask_availability(round):
         """actually send a direct message to ask if a person is available
         and update the person's last_query accordingly
         """
-        send_dm.delay(person.user_id,
+        send_msg.delay(person.user_id,
             text=messages.ASK_IF_AVAILABLE.format(person=person, pool=pool))
         person.last_query = QUESTIONS["availability"]
         person.last_query_pool = pool
@@ -250,7 +250,7 @@ def ask_availability(round):
                 # keys on "profile" are not guaranteed to exist
                 full_name = user["user"]["profile"]["real_name"]
             except KeyError:
-                send_dm.delay(user_id, text=messages.PERSON_MISSING_NAME)
+                send_msg.delay(user_id, text=messages.PERSON_MISSING_NAME)
                 logger.warning("Slack \"real_name\" field missing for user: "
                     f"{user_id}")
                 continue
@@ -260,7 +260,7 @@ def ask_availability(round):
             person.save()
             PoolMembership.objects.create(person=person, pool=pool)
             logger.info(f"Added {person} to pool \"{pool}\".")
-            send_dm.delay(user_id, text=messages.WELCOME_INTRO\
+            send_msg.delay(user_id, text=messages.WELCOME_INTRO\
                 .format(person=person, pool=pool))
             person.last_query = QUESTIONS["intro"]
             person.last_query_pool = pool
