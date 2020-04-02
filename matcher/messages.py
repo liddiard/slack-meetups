@@ -23,7 +23,7 @@ MATCH_INTRO = """*{person_1.casual_name}*, meet your {pool.name} pairing, {perso
 > {person_1.intro}
 
 
-Message each other here to *pick a time to meet* this week!
+Message each other below to *pick a time to meet* this week!
 """
 UPDATED_AVAILABLE = "Sounds good! I’ll pair you with someone at the start of the upcoming round."
 UPDATED_UNAVAILABLE = "Okay, thanks for letting me know. I’ll ask again next time!"
