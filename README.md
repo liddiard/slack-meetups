@@ -13,9 +13,9 @@ It supports variable frequency and length for rounds of matching, multiple match
 
 ## Tech stack
 
-- Django running on Python 3.7+
+- [Django](https://www.djangoproject.com/) running on Python 3.7+
 - SQLite 3 (you can change databases if you need something more robust, but it's not a particularly database-intensive application)
-- Slack Python SDK
+- [Celery](http://www.celeryproject.org/) running on [RabbitMQ](https://www.rabbitmq.com/) as an async task queue for sending messages
 
 **Need to use the Slack [Real-Time Messaging (RTM) API](https://api.slack.com/rtm) instead of the [Events API](https://api.slack.com/events-api)?** Check out the `rtm` branch. You will need to use the RTM API if you're inside a corporate intranet or firewall that won't allow you to receive events from Slack on a publicly accessible URL. The `rtm` branch has a Node.js proxy server under `rtmProxy/` that connects to the socket-based RTM API and forwards events to the Django server. 
 
@@ -108,8 +108,6 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 ## Known limitations
 
 - The bot's message content is a bit specific in places and may not match your use case. Luckily, all content is stored within `matcher/messages.py` so it's fairly easy to customize if you want to fork the repo.
-- The bot doesn't do much to handle cases where a person is a member of multiple pools. It will work, but people can't have separate intro text or availability statuses per pool. 
-- The bot will only ask about a person's most recent match when asking if they met up, so overlapping rounds with the same person, either in the same pool or among multiple pools, may not give you as much data about who met up.
 - The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message, with a mention to contact the bot's admin, if configured. Having the bot respond to other queries would require some refactoring as it would have to keep track of the last message sent to each user.
 - Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job.
 - On the admin side, there's not a ton of input validation. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these things.
@@ -120,6 +118,7 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 
 - Python 3.7+ (the code uses F-strings which aren't available in earlier versions of Python 3)
 - Pip 3
+- [RabbitMQ](https://www.rabbitmq.com/download.html)
 
 ### Installation
 
@@ -130,15 +129,25 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 5. `cd [repo]`
 6. `pip3 install -r requirements.txt`
 
-### Configuring the server
+### Configuring the web server
 
-1. Create and set required environment variables in your environment: `SECRET_KEY` (required; a long random string for Django's cryptography), `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-"), `SLACK_SIGNING_SECRET` (required; used to verify that requests are from Slack), `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who people should contact if they have questions)
+1. Create and set required environment variables in your environment: `SECRET_KEY` (required; a long random string for Django's cryptography), `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-"), `SLACK_SIGNING_SECRET` (required; used to verify that requests are from Slack), `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who will be messaged if the bot receives a message it doesn't know how to act on)
 2. `python manage.py collectstatic` to move static files for serving
 3. `python manage.py makemigrations` to set up migrations to create the database tables
 5. `python manage.py migrate` to create the database tables
 5. `python manage.py createsuperuser` to create your user to log in to the admin
 6. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups.wsgi`.
 7. Log in to the admin and follow the steps above to set up a matching pool. The admin URL is `<your base url>:<port number>/admin/`.
+
+### Configuring the Celery task queue
+
+In order to send Slack messages from the bot, you also need to run a Celery task queue. This queue allows the bot to send messages asyncronously and retry if sending fails, which can happen if there are network issues or the bot gets rate-limited by the Slack API.
+
+After installing RabbitMQ (see Prerequisites above), do the following:
+
+1. Start the RabbitMQ broker by running `rabbitmq-server`
+2. In a separate terminal window, source the virtualenv with the command `source bin/activate` (or whatever the path to the `activate` script is)
+3. Start the Celery task queue: `celery -A matcher.slack worker --loglevel=info`
 
 ## TODO
 
@@ -150,7 +159,7 @@ MVP requirements done!
 
 - automatic reporting of stats
 - analytics graphs
-- can we determine when a person joined Slack and use that info somehow?
 - unit tests? maybe? 🙃
+- notify the admin when the bot receives a query it doesn't know how to handle and allow the admin to respond from the bot
 
 _This Slack bot is in no way endorsed by or affiliated with Slack Technologies or their product, Slack._

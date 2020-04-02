@@ -66,3 +66,19 @@ def determine_yes_no_answer(message):
         raise ValueError("Unable to determine response from message")
     else:
         return yes_response
+
+def get_at_mention(message):
+    """Extract the first user ID from an @-mention in a message's text, if any
+    """
+    pattern = "<@(.*?)>" # e.g. "<@UJQ07L30Q>"
+    match = re.search(pattern, message)
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def remove_at_mention(message):
+    """Remove the first @-mention from a message, if any
+    """
+    pattern = "\s?<@.*?>\s?" # e.g. " <@UJQ07L30Q> "
+    return re.sub(pattern, "", message, count=1)

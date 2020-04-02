@@ -7,7 +7,8 @@ import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .models import Person, Match, Pool, PoolMembership
 from .slack import  send_dm
-from .utils import get_other_person_from_match, determine_yes_no_answer
+from .utils import (get_person_from_match, get_other_person_from_match,
+    get_at_mention, remove_at_mention)
 from .constants import QUESTIONS
 
 
@@ -40,6 +41,12 @@ def handle_slack_message(request):
     bot_id = event.get("bot_id")
     if bot_id:
         return HttpResponse(204)
+    # If the message sent was from the admin and they're @-mentioning someone,
+    # send a message to that Slack user from the bot.
+    message_sender = event.get("user")
+    message_text = event.get("text")
+    if message_sender == ADMIN_SLACK_USER_ID and get_at_mention(message_text):
+	    return send_message_as_bot(message_text)
     # Currently the only free-text (as opposed to action blocks) message we
     # expect from the user is their intro. If we wanted to support more text
     # messages in the future, we'd have to store the last sent message type on
@@ -48,17 +55,8 @@ def handle_slack_message(request):
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
-        # user is unregistered, send an informational message
-        pools = Pool.objects.all()
-        channels_list = "\n".join(
-            [f"• <#{pool.channel_id}|{pool.channel_name}>" for pool in pools]
-        )
-        message_text = event.get("text")
-        logger.info(f"Received query from unregistered user {user_id}: "\
-            f"\"{message_text}\".")
-        send_dm(user_id,
-            text=messages.UNREGISTERED_PERSON.format(channels=channels_list))
-        return HttpResponse(204)
+        # user is not registered with the bot
+        return handle_unknown_message(user_id, message_text)
     message_map = {
         QUESTIONS["intro"]: update_intro,
         QUESTIONS["met"]: update_met,
@@ -66,19 +64,13 @@ def handle_slack_message(request):
     }
     message = event.get("text")
     if not person.last_query:
-        # the bot didn't ask the user anything, tell them we don't know how to
-        # respond
-        if ADMIN_SLACK_USER_ID:
-            contact_phrase = f", <@{ADMIN_SLACK_USER_ID}>."
-        else:
-            contact_phrase = "."
-        logger.info(f"Received unknown query from {person}: \"{message}\".")
-        send_dm(user_id,
-            text=messages.UNKNOWN_QUERY.format(contact_phrase=contact_phrase))
-        return HttpResponse(204)
+        # the bot didn't ask the user anything, it's not expecting any 
+        # particular message from them
+        return handle_unknown_message(user_id, message_text)
     try:
         handler_func = message_map[person.last_query]
     except KeyError:
+        logger.error(f"Unknown last query for {person}: {person.last_query}")
         return JsonResponse(status=500,
             data={"error": f"unknown last query \"{person.last_query}\""})
     return handler_func(event, person)
@@ -103,7 +95,7 @@ def update_intro(event, person):
     if ADMIN_SLACK_USER_ID:
         message += (" " + messages.INTRO_RECEIVED_QUESTIONS\
             .format(ADMIN_SLACK_USER_ID=ADMIN_SLACK_USER_ID))
-    send_dm(user_id, text=message)
+    send_dm.delay(user_id, text=message)
     return HttpResponse(204)
 
 
@@ -132,7 +124,7 @@ def update_availability(event, person):
         message = messages.UPDATED_AVAILABLE
     else:
         message = messages.UPDATED_UNAVAILABLE
-    send_dm(person.user_id, text=message)
+    send_dm.delay(person.user_id, text=message)
     ask_if_met(person, pool)
     return HttpResponse(204)
 
@@ -157,7 +149,7 @@ def ask_if_met(person, pool):
     if latest_match.met is None:
         other_person = get_other_person_from_match(person.user_id,
             latest_match)
-        send_dm(person.user_id, text=messages.ASK_IF_MET.format(
+        send_dm.delay(person.user_id, text=messages.ASK_IF_MET.format(
             other_person=other_person, pool=pool))
         person.last_query = QUESTIONS["met"]
         person.last_query_pool = pool
@@ -201,5 +193,31 @@ def update_met(event, person):
         message = messages.MET.format(other_person=other_person)
     else:
         message = messages.DID_NOT_MEET
-    send_dm(person.user_id, text=message)
+    send_dm.delay(person.user_id
+    , text=message)
+    return HttpResponse(204)
+
+
+def handle_unknown_message(user_id, message):
+    """If the bot receives a message it doesn't know how to deal with, send it
+    a direct message to the admin, if defined, otherwise respond with a
+    generic "Sorry I don't know how to help you" type of message
+    """
+    logger.info(f"Received unknown query from {user_id}: \"{message}\".")
+    if ADMIN_SLACK_USER_ID:
+        send_dm.delay(ADMIN_SLACK_USER_ID,
+            text=messages.UNKNOWN_MESSAGE_ADMIN.format(user_id=user_id,
+            message=message))
+    else:
+        send_dm.delay(user_id, text=messages.UNKNOWN_MESSAGE_NO_ADMIN)
+    return HttpResponse(204)
+
+
+def send_message_as_bot(message):
+    """Send a message to the first user @-mentioned in message as the bot
+    """
+    user_id = get_at_mention(message)
+    message = remove_at_mention(message)
+    send_dm.delay(user_id, text=message)
+    logger.info(f"Sent message to {user_id} as bot: \"{message}\".")
     return HttpResponse(204)

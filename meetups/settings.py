@@ -33,7 +33,7 @@ else:
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "1f8eb9f7.ngrok.io",
+    "08db7184.ngrok.io",
     "slack-meetups.appspot.com"
 ]
 
@@ -152,6 +152,9 @@ LOGGING = {
         },
     },
 }
+
+# Celery config
+CELERY_BROKER_URL = "pyamqp://guest@localhost//"
 
 
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
