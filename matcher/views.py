@@ -166,6 +166,8 @@ def update_availability(payload, action, pool_id):
     else:
         message = messages.UPDATED_UNAVAILABLE
     logger.info(f"Set the availability of {person} in {pool} to {available}.")
+    # perform tasks in sequence to avoid a race condition between the messages
+    # https://docs.celeryproject.org/en/4.4.2/userguide/canvas.html#chains
     (send_dm.s(user_id, text=message) |
      ask_if_met.s(user_id, pool.pk)).delay()
     return HttpResponse(204)
