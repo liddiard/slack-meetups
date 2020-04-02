@@ -8,7 +8,7 @@ from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .models import Person, Match, Pool, PoolMembership
 from .slack import  send_dm
 from .utils import (get_person_from_match, get_other_person_from_match,
-    get_at_mention, remove_at_mention)
+    get_at_mention, remove_at_mention, determine_yes_no_answer)
 from .constants import QUESTIONS
 
 
@@ -167,6 +167,7 @@ def update_met(event, person):
         logger.info(f"Unsure yes/no query from {person}: \"{message_text}\".")
         send_dm(person.user_id, text=messages.UNSURE_YES_NO_ANSWER)
         return HttpResponse(204)
+    pool = person.last_query_pool
     # a Person can be either `person_1` or `person_2` on a Match; it's random
     user_matches = (
         Match.objects.filter(round__pool=pool, person_1=person) |
