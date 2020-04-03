@@ -75,7 +75,22 @@ def open_match_dm(self, match_id):
     """
      # import within the function to avoid a circular ImportError
     import matcher.models as models
-    match = models.Match.objects.get(pk=match_id)
+    Match = models.Match
+
+    # get the Match object
+    try:
+        match = Match.objects.get(pk=match_id)
+    # the match *should* always exist here as this function runs post-save,
+    # but it doesn't for some reason. retry to work around it, though the
+    # underlying race condition should be indentified
+    except Match.DoesNotExist as exception:
+        wait_time = get_wait_time(exception, self.request)
+        logger.warning(f"Did not find match with ID: {match_id}. Retrying in "
+            f"{wait_time} seconds. Error: {exception}. "
+            f"{get_retries_remaining(self)} retries remaining.")
+        raise self.retry(exc=exception, countdown=wait_time)
+
+    # open a direct message between the people in the match
     user_ids = ",".join([match.person_1.user_id, match.person_2.user_id])
     # https://api.slack.com/methods/conversations.open
     try:
@@ -88,6 +103,7 @@ def open_match_dm(self, match_id):
             f"{get_retries_remaining(self)} retries remaining.")
         raise self.retry(exc=exception, countdown=wait_time)
     match.save()
+    
     # send people's introductions to each other in the channel
     # `unfurl_links=False` prevents link previews from appearing if someone
     # included a link in their intro
