@@ -20,7 +20,7 @@ def get_default_end_date():
     return date.today() + timedelta(days=4)
 
 
-def handle_match_save(sender, instance, created):
+def handle_match_save(sender, instance, created, **kwargs):
     """helper function to call `open_match_dm.delay` with the right arguments
     """
     if created:
