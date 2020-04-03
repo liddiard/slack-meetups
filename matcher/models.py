@@ -3,6 +3,7 @@ import logging
 import pytz
 
 from django.db import models
+from django.db.models.signals import post_save
 
 import matcher.messages as messages
 from .tasks import client, send_msg, open_match_dm
@@ -17,6 +18,13 @@ def get_default_end_date():
     # https://stackoverflow.com/a/12654998
     # rounds typically start on a Monday and end on a Friday (4 days later)
     return date.today() + timedelta(days=4)
+
+
+def handle_match_save(sender, instance, created):
+    """helper function to call `open_match_dm.delay` with the right arguments
+    """
+    if created:
+        open_match_dm.delay(instance.pk)
 
 
 class Pool(models.Model):
@@ -107,6 +115,9 @@ class Person(models.Model):
 
 
 class PoolMembership(models.Model):
+    """a person in a pool, including their availability for matching in that
+    pool
+    """
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
     available = models.BooleanField(null=True) # null corresponds to unknown
@@ -158,15 +169,11 @@ class Match(models.Model):
     class Meta:
         verbose_name_plural = "matches"
 
-    def save(self, *args, **kwargs):
-        create = not bool(self.pk)
-        super(Match, self).save(*args, **kwargs)
-        if create:
-            # automatically send matching message when a match is created
-            open_match_dm.delay(self.pk)
-
     def __str__(self):
         return f"{self.person_1} ↔ {self.person_2} for round “{self.round}”"
+
+# automatically send matching message when a match is created
+post_save.connect(handle_match_save, sender=Match)
 
 
 def ask_availability(round):
