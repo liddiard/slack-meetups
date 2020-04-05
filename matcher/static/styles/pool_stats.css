@@ -113,10 +113,29 @@ table th {
   color: var(--did-not-meet-color);
 }
 
+#loading {
+  position: absolute;
+  width: 100vw;
+  height: 100vw;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+  padding-top: 48vw;
+  transition: 2s opacity;
+  transition-delay: 2s;
+}
+
+#loading.disappear {
+  opacity: 0;
+}
+
 figure {
   margin: 0;
   opacity: 0;
-  transition: opacity 6s;
+  transition: opacity 5s;
+  transition-delay: 2s;
 }
 
 figure.appear {

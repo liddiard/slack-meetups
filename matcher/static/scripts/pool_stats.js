@@ -100,6 +100,7 @@ async function main() {
   });
 
   document.querySelector('figure').classList.add('appear');
+  document.getElementById('loading').classList.add('disappear');
 }
 
 
