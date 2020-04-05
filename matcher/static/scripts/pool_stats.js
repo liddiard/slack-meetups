@@ -113,9 +113,11 @@ async function main() {
     .forEach(el => {
       el.classList.add('selected');
     });
+    document.querySelector('figure').classList.add('node-selected');
   }
 
   function mouseout(d) {
+    document.querySelector('figure').classList.remove('node-selected');
     document.querySelectorAll(`.person-${d.id}`)
     .forEach(el => {
       el.classList.remove('selected');

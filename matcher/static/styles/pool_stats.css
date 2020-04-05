@@ -115,6 +115,15 @@ figure {
   margin: 0;
 }
 
+figure.node-selected :not(.selected) > circle {
+  fill-opacity: 0.1;
+  stroke-opacity: 0.2;
+}
+
+figure.node-selected :not(.selected) > text {
+  fill-opacity: 0.2;
+}
+
 circle {
   fill: var(--circle-color);
   fill-opacity: 0.4;
