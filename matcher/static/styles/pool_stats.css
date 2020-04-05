@@ -1,0 +1,118 @@
+body {
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 2em;
+  margin: 0;
+}
+
+aside {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0, 0.25);
+  border: 1px solid rgba(0,0,0, 0.15);
+  background-color: rgba(255,255,255, 0.8);
+  padding: 1em;
+}
+
+aside h2 {
+  margin-bottom: 0.25em;
+}
+
+aside p {
+  margin-top: 0;
+}
+
+aside #stats {
+  list-style-type: none;
+  padding: 0;
+  margin: 0.5em 0;
+  font-size: 1.2em;
+  color: #666;
+}
+
+aside #stats li {
+  display: inline;
+  margin-right: 0.5em;
+}
+
+aside #stats .stat {
+  font-weight: bold;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid rgba(0,0,0, 0.2);
+  padding: 0.2em 0.4em;
+}
+
+th {
+  color: white;
+  background-color: #2c2e2f;
+}
+
+tr:nth-child(even) {
+  background-color: rgba(0,0,0, 0.05);
+}
+
+table th {
+  text-align: left;
+}
+
+#leaderboard {
+  max-height: 280px;
+  overflow-y: scroll;
+  box-shadow: 0 -10px 5px -5px rgba(0,0,0, 0.2) inset
+}
+
+#legend {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  max-width: 480px;
+  line-height: 1.4;
+  color: #666;
+}
+
+figure {
+  margin: 0;
+}
+
+circle {
+  fill: #50c7f9;
+  fill-opacity: 0.4;
+  stroke: white;
+  stroke-width: 2;
+}
+
+text {
+  font-size: 0.8em;
+  font-family: Helvetica, Arial, sans-serif;
+  text-shadow: 1px 1px white, 0 0 4px white;
+  cursor: default;
+}
+
+line {
+  stroke: #b7bcbf;
+  stroke-width: 2;
+  stroke-opacity: 0.2;
+}
+
+line.met {
+  stroke: #ff9600;
+}
+
+line.selected {
+  stroke-opacity: 1;
+  stroke-width: 3;
+}
+
+.person:hover circle, .person.selected circle {
+  fill-opacity: 1;
+}
