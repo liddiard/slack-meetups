@@ -3,6 +3,7 @@ import logging
 
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import decorator_from_middleware
+from django.views.decorators.cache import cache_page
 
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
@@ -95,7 +96,7 @@ def handle_slack_action(request):
             data={"error": f"unknown action \"{action.get('block_id')}\""})
     return action_func(req, action, block_id)
 
-
+@cache_page(60 * 10) # cache response for 10 minutes
 def get_pool_stats(request, channel_name):
     """validate that an incoming Slack message is well-formed enough to
     continue processing, and if so send to its appropriate handler function
