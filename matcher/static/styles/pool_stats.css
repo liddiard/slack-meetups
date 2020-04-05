@@ -1,3 +1,12 @@
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 :root {
   --met-color: #ff9600;
   --did-not-meet-color: #b7bcbf;
@@ -122,13 +131,24 @@ table th {
   bottom: 0;
   left: 0;
   text-align: center;
-  padding-top: 48vw;
-  transition: 2s opacity;
+  padding-top: 45vw;
+  transition: 0.5s opacity;
   transition-delay: 2s;
+  font-size: 1.2em;
 }
 
 #loading.disappear {
   opacity: 0;
+}
+
+#loading .spinner {
+  font-size: 1.2em;
+  font-weight: bold;
+  animation: rotate 0.5s linear infinite;
+  display: inline-block;
+  margin-right: 0.2em;
+  color: var(--circle-color);
+  filter: brightness(85%);
 }
 
 figure {
