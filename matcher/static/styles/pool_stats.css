@@ -58,20 +58,20 @@ aside #stats .stat {
 
 table {
   border-collapse: collapse;
+  border: 1px solid rgba(0,0,0, 0.15);
 }
 
 table, th, td {
-  border: 1px solid rgba(0,0,0, 0.2);
   padding: 0.2em 0.4em;
 }
 
 th {
   color: white;
-  background-color: #2c2e2f;
+  background-color: #003087;
 }
 
 tr:nth-child(even) {
-  background-color: #eaeced;
+  background-color: #e4f1fb;
 }
 
 td.rank {
