@@ -2,6 +2,7 @@ import json
 import logging
 
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.cache import cache_page
 
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
@@ -75,7 +76,7 @@ def handle_slack_message(request):
             data={"error": f"unknown last query \"{person.last_query}\""})
     return handler_func(event, person)
 
-
+@cache_page(60 * 10) # cache response for 10 minutes
 def get_pool_stats(request, channel_name):
     """validate that an incoming Slack message is well-formed enough to
     continue processing, and if so send to its appropriate handler function

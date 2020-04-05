@@ -35,7 +35,7 @@ class Pool(models.Model):
     name = models.CharField(max_length=64, unique=True)
     name.help_text = "A human-readable name for this pool, like “2020 "\
         "interns”"
-    channel_id = models.CharField(max_length=11, unique=True)
+    channel_id = models.CharField(max_length=11, unique=True, db_index=True)
     channel_id.help_text = "Slack channel ID. You can get this from the URL "\
         "for the Slack channel when loaded in a web browser."
     channel_name = models.CharField(max_length=80)
