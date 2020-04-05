@@ -100,7 +100,9 @@ async function main() {
   });
 
   document.querySelector('figure').classList.add('appear');
-  document.getElementById('loading').classList.add('disappear');
+  const loading = document.getElementById('loading');
+  loading.classList.add('disappear');
+  window.setTimeout(() => loading.style.display = 'none', 4000);
 }
 
 
