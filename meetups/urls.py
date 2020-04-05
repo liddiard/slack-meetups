@@ -23,6 +23,11 @@ from matcher import views
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
     path("slack/message/", views.handle_slack_message, name="slack_message"),
+    path("api/stats/<channel_name>/", views.get_pool_stats,
+        name="pool_stats"),
+    path("stats/<channel_name>/",
+        TemplateView.as_view(template_name="pool_stats.html"),
+        name="pool_stats_page"),
     path("rcg/", TemplateView.as_view(template_name="rcg_meetups.html"),
         name="rcg_meetups"),
     path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
