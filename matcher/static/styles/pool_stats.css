@@ -1,3 +1,9 @@
+:root {
+  --met-color: #ff9600;
+  --did-not-meet-color: #b7bcbf;
+  --circle-color: #50c7f9;
+}
+
 html {
   box-sizing: border-box;
 }
@@ -88,12 +94,29 @@ table th {
   line-height: 1.4;
 }
 
+#legend .accent {
+  font-weight: bold;
+  filter: brightness(85%);
+}
+
+#legend .circle {
+  color: var(--circle-color);
+}
+
+#legend .met {
+  color: var(--met-color);
+}
+
+#legend .did-not-meet {
+  color: var(--did-not-meet-color);
+}
+
 figure {
   margin: 0;
 }
 
 circle {
-  fill: #50c7f9;
+  fill: var(--circle-color);
   fill-opacity: 0.4;
   stroke: white;
   stroke-width: 2;
@@ -107,13 +130,13 @@ text {
 }
 
 line {
-  stroke: #b7bcbf;
+  stroke: var(--did-not-meet-color);
   stroke-width: 2;
   stroke-opacity: 0.2;
 }
 
 line.met {
-  stroke: #ff9600;
+  stroke: var(--met-color);
 }
 
 line.selected {
