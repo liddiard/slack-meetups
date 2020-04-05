@@ -102,7 +102,7 @@ async function main() {
   document.querySelector('figure').classList.add('appear');
   const loading = document.getElementById('loading');
   loading.classList.add('disappear');
-  window.setTimeout(() => loading.style.display = 'none', 4000);
+  window.setTimeout(() => loading.style.display = 'none', 2500);
 }
 
 
