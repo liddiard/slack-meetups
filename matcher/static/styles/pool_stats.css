@@ -129,6 +129,8 @@ circle {
   fill-opacity: 0.4;
   stroke: white;
   stroke-width: 2;
+  stroke-opacity: 0.8;
+  transition: fill-opacity 0.25s, stroke-opacity 0.25s;
 }
 
 text {
@@ -136,12 +138,14 @@ text {
   font-family: Helvetica, Arial, sans-serif;
   text-shadow: 1px 1px white, 0 0 4px white;
   cursor: default;
+  transition: fill-opacity 0.25s;
 }
 
 line {
   stroke: var(--did-not-meet-color);
   stroke-width: 2;
   stroke-opacity: 0.2;
+  transition: stroke-width 0.25s, stroke-opacity 0.25s;
 }
 
 line.met {
@@ -149,10 +153,10 @@ line.met {
 }
 
 line.selected {
-  stroke-opacity: 1;
+  stroke-opacity: 0.8;
   stroke-width: 3;
 }
 
 .person:hover circle, .person.selected circle {
-  fill-opacity: 1;
+  fill-opacity: 0.8;
 }
