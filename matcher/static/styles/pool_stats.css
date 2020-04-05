@@ -59,6 +59,7 @@ aside #stats .stat {
 table {
   border-collapse: collapse;
   border: 1px solid rgba(0,0,0, 0.15);
+  width: 100%;
 }
 
 table, th, td {
