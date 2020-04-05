@@ -7,7 +7,7 @@ from django.utils.decorators import decorator_from_middleware
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .middleware import VerifySlackRequest
-from .models import Person, Match, Pool, PoolMembership
+from .models import Person, Match, Pool, PoolMembership, Round
 from .tasks import  send_msg, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
                     get_mention, remove_mention)
@@ -94,6 +94,33 @@ def handle_slack_action(request):
         return JsonResponse(status=400, 
             data={"error": f"unknown action \"{action.get('block_id')}\""})
     return action_func(req, action, block_id)
+
+
+def get_pool_stats(request, channel_name):
+    """validate that an incoming Slack message is well-formed enough to
+    continue processing, and if so send to its appropriate handler function
+    """
+    if request.method != "GET":
+        return JsonResponse(status=405,
+            data={"error": f"\"{request.method}\" method not supported"})
+    try:
+        pool = Pool.objects.get(channel_name=channel_name)
+    except Pool.DoesNotExist:
+        return JsonResponse(status=404,
+            data={"error": f"pool with channel name {channel_name} does not "
+                            "exist"})
+    matches = Match.objects.filter(round__pool=pool)
+    match_people = set([match.person_1.pk for match in matches] +
+                        [match.person_2.pk for match in matches])
+    return JsonResponse({
+        "name": pool.name,
+        "member_count": PoolMembership.objects.filter(pool=pool).count(),
+        "people": list(Person.objects.filter(pk__in=match_people)\
+            .values("id", "full_name")),
+        "round_count": Round.objects.filter(pool=pool).count(),
+        "matches": list(matches.values("id", "person_1", "person_2",
+            "met"))
+    })
 
 
 def update_intro(event):
