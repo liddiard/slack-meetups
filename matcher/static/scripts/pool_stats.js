@@ -98,6 +98,8 @@ async function main() {
     node
       .attr('transform', d => `translate(${d.x},${d.y})`)
   });
+
+  document.querySelector('figure').classList.add('appear');
 }
 
 

@@ -115,6 +115,12 @@ table th {
 
 figure {
   margin: 0;
+  opacity: 0;
+  transition: opacity 6s;
+}
+
+figure.appear {
+  opacity: 1;
 }
 
 figure.node-selected :not(.selected) > circle {
