@@ -98,55 +98,55 @@ async function main() {
     node
       .attr('transform', d => `translate(${d.x},${d.y})`)
   });
+}
 
 
-  // UTILITY FUNCTIONS
+// UTILITY FUNCTIONS
 
-  // specifies the size of the node's collision bounds.
-  // derive from category name length for long names to prevent overlap
-  function boundingBox(d) {
-    return Math.max(d.full_name.length * 3.4, d.people_met * 2.5);
+// specifies the size of the node's collision bounds.
+// derive from category name length for long names to prevent overlap
+function boundingBox(d) {
+  return Math.max(d.full_name.length * 3.4, d.people_met * 2.5);
+}
+
+function mouseover(d) {
+  document.querySelectorAll(`.person-${d.id}`)
+  .forEach(el => {
+    el.classList.add('selected');
+  });
+  document.querySelector('figure').classList.add('node-selected');
+}
+
+function mouseout(d) {
+  document.querySelector('figure').classList.remove('node-selected');
+  document.querySelectorAll(`.person-${d.id}`)
+  .forEach(el => {
+    el.classList.remove('selected');
+  });
+}
+
+function drag(simulation) {
+  const dragstarted = d => {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
   }
   
-  function mouseover(d) {
-    document.querySelectorAll(`.person-${d.id}`)
-    .forEach(el => {
-      el.classList.add('selected');
-    });
-    document.querySelector('figure').classList.add('node-selected');
-  }
-
-  function mouseout(d) {
-    document.querySelector('figure').classList.remove('node-selected');
-    document.querySelectorAll(`.person-${d.id}`)
-    .forEach(el => {
-      el.classList.remove('selected');
-    });
+  const dragged = d => {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
   }
   
-  function drag(simulation) {
-    const dragstarted = d => {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-    
-    const dragged = d => {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    }
-    
-    const dragended = d => {
-      if (!d3.event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-    
-    return d3.drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);
+  const dragended = d => {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
   }
+  
+  return d3.drag()
+    .on('start', dragstarted)
+    .on('drag', dragged)
+    .on('end', dragended);
 }
 
 main();
