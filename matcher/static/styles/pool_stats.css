@@ -183,7 +183,6 @@ circle {
 
 text {
   font-size: 0.8em;
-  font-family: Helvetica, Arial, sans-serif;
   text-shadow: 1px 1px white, 0 0 4px white;
   cursor: default;
   transition: fill-opacity 0.25s;
