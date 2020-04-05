@@ -14,6 +14,7 @@ html {
 body {
   margin: 0;
   font-family: Helvetica, Arial, sans-serif;
+  background-color: #f5f7fa;
 }
 
 h1 {
@@ -70,7 +71,7 @@ th {
 }
 
 tr:nth-child(even) {
-  background-color: rgba(0,0,0, 0.05);
+  background-color: #eaeced;
 }
 
 td.rank {
