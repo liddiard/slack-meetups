@@ -8,11 +8,14 @@ async function main() {
     pool = await fetch(`/api/stats/${channelName}`).then(res => res.json());
     
   // update text on the page
+  document.title = `${pool.name} statistics`;
   document.getElementById('pool-name').innerText = pool.name;
   document.getElementById('member-count').innerText = pool.member_count;
   document.getElementById('round-count').innerText = pool.round_count;
-  document.title = `${pool.name} statistics`;
-
+  document.getElementById('matches-count').innerText = pool.matches.length;
+  document.getElementById('avg-round-size').innerText = Math.round((pool.matches.length * 2) / pool.round_count);
+  document.getElementById('meetup-rate').innerText = `${Math.round((pool.matches.filter(match => match.met).length / pool.matches.length) * 100) || 'N/A'}%`;
+  
   // populate the leaderboard
   const leaderboard = document.querySelector('#leaderboard tbody');
   pool.people = pool.people.map(person => Object.assign(person, {
@@ -28,9 +31,9 @@ async function main() {
       curRank++;
     }
     tr.innerHTML = `
-      <td><strong>${curRank}</strong></td>
-      <td>${person.full_name}</td>
-      <td>${person.people_met}</td>
+      <td class="rank">${curRank}</td>
+      <td class="name">${person.full_name}</td>
+      <td class="people-met">${person.people_met}</td>
     `
     leaderboard.appendChild(tr);
   })

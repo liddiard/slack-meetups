@@ -13,19 +13,23 @@
 
     <aside>
       <h1 id="pool-name"></h1>
+      <h2>📊 Statistics</h2>
       <ul id="stats">
         <li><span id="member-count" class="stat"></span> members</li>
         <li><span id="round-count" class="stat"></span> rounds</li>
+        <li><span id="matches-count" class="stat"></span> matches</li>
+        <li><span id="avg-round-size" class="stat"></span> average round size</li>
+        <li><span id="meetup-rate" class="stat"></span> meetup rate</li>
       </ul>
-      <h2>Leaderboard</h2>
+      <h2>🏆 Leaderboard</h2>
       <p>Who’s met the most people:</p>
       <div id="leaderboard">
         <table>
           <thead>
             <tr>
-              <th>Rank</th>
-              <th>Name</th>
-              <th>Met</th>            
+              <th class="rank">Rank</th>
+              <th class="name">Name</th>
+              <th class="people-met">Met</th>            
             </tr>
           </thead>
           <tbody></tbody>
@@ -34,7 +38,7 @@
     </aside>
 
     <div id="legend">
-      Circles are sized based on the number of people each person has met. Hover over a circle to see a person’s pairings. Orange lines show pairings that actually met, while gray lines show pairings that didn’t. This visualization looks best on a larger display.
+      Circles are sized based on the number of people each person has met. Hover over a circle to see a person’s pairings. Orange lines show pairings that actually met, while gray lines show pairings that didn’t. This visualization looks best on a large display.
     </div>
 
 		<figure>

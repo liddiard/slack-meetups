@@ -76,7 +76,7 @@ def handle_slack_message(request):
             data={"error": f"unknown last query \"{person.last_query}\""})
     return handler_func(event, person)
 
-@cache_page(60 * 10) # cache response for 10 minutes
+@cache_page(60 * 30) # cache response for 30 minutes
 def get_pool_stats(request, channel_name):
     """validate that an incoming Slack message is well-formed enough to
     continue processing, and if so send to its appropriate handler function
