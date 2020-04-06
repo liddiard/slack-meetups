@@ -90,7 +90,11 @@ def get_pool_stats(request, channel_name):
         return JsonResponse(status=404,
             data={"error": f"pool with channel name {channel_name} does not "
                             "exist"})
-    matches = Match.objects.filter(round__pool=pool)
+    most_recent_round = Round.objects.filter(pool=pool).latest("end_date")
+    # exclude the most recent round because we won't have info yet on who met
+    # up from it, so including it would skew the statistics
+    matches = Match.objects.filter(round__pool=pool)\
+        .exclude(round=most_recent_round)
     match_people = set([match.person_1.pk for match in matches] +
                         [match.person_2.pk for match in matches])
     return JsonResponse({
@@ -98,7 +102,8 @@ def get_pool_stats(request, channel_name):
         "member_count": PoolMembership.objects.filter(pool=pool).count(),
         "people": list(Person.objects.filter(pk__in=match_people)\
             .values("id", "full_name")),
-        "round_count": Round.objects.filter(pool=pool).count(),
+        "round_count": Round.objects.filter(pool=pool)\
+            .exclude(pk=most_recent_round.pk).count(),
         "matches": list(matches.values("id", "person_1", "person_2",
             "met"))
     })
