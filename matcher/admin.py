@@ -32,7 +32,7 @@ class IntroListFilter(admin.SimpleListFilter):
 
 
 class AvailabilityListFilter(admin.SimpleListFilter):
-    title = "available for pool"
+    title = "availability for pool"
     parameter_name = "available_for_pool"
 
     def lookups(self, request, model_admin):
