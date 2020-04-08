@@ -9,7 +9,7 @@ from celery import Celery
 
 import matcher.messages as messages
 from meetups import settings
-from .utils import get_other_person_from_match
+from .utils import get_other_person_from_match, blockquote
 
 
 # Note: The Celery worker requires this environment variable to be set in this
@@ -110,8 +110,10 @@ def open_match_dm(self, match_id):
     try:
         client.chat_postMessage(channel=match.conversation_id, as_user=True,
             text=messages.MATCH_INTRO.format(person_1=match.person_1,
-            person_2=match.person_2, pool=match.round.pool),
-            unfurl_links=False)
+            person_1_intro=blockquote(match.person_1.intro),
+            person_2=match.person_2,
+            person_2_intro=blockquote(match.person_2.intro),
+            pool=match.round.pool), unfurl_links=False)
     except Exception as exception: # see [1] (bottom of file)
         wait_time = get_wait_time(exception, self.request)
         logger.warning(f"Failed to send message for match: {match}. "
