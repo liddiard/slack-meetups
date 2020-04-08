@@ -13,12 +13,12 @@ After I have your introduction, you’ll get your first pairing!
 """
 MATCH_INTRO = """*{person_1.casual_name}*, meet your {pool.name} pairing, {person_2.full_name}! Here’s a little about {person_2.casual_name} in their own words:
 
-> {person_2.intro}
+{person_2_intro}
 
 
 *{person_2.casual_name}*, meet your {pool.name} pairing, {person_1.full_name}! Here’s a little about {person_1.casual_name} in their own words:
 
-> {person_1.intro}
+{person_1_intro}
 
 
 Message each other below to *pick a time to meet* this week!
@@ -29,7 +29,7 @@ MET = "Great! Hope you enjoyed meeting {other_person.casual_name} 🙂"
 DID_NOT_MEET = "Thanks for the feedback! Hope you have a chance to meet next time 🙂"
 UNKNOWN_MESSAGE_ADMIN = """_Message from <@{user_id}>:_
 
-> {message}
+{message}
 
 _Respond as the bot by typing_ “<@{user_id}> <your reply>”
 """

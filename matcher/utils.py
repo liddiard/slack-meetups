@@ -77,6 +77,16 @@ def determine_yes_no_answer(message):
         return yes_response
 
 
+def blockquote(message):
+    """return `message` with markdown blockquote formatting (start each line
+    with "> ")
+    """
+    if message:
+        return re.sub(r"^", "> ", message, flags=re.MULTILINE)
+    else:
+        return None
+
+
 def get_mention(message):
     """get the user or channel ID mentioned at the beginning of a message, if
     any

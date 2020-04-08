@@ -9,7 +9,8 @@ from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .models import Person, Match, Pool, PoolMembership, Round
 from .tasks import  send_msg, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
-                    get_mention, remove_mention, determine_yes_no_answer)
+                    blockquote, get_mention, remove_mention,
+                    determine_yes_no_answer)
 from .constants import QUESTIONS
 
 
@@ -217,7 +218,7 @@ def handle_unknown_message(user_id, message):
     if ADMIN_SLACK_USER_ID:
         send_msg.delay(ADMIN_SLACK_USER_ID,
             text=messages.UNKNOWN_MESSAGE_ADMIN.format(user_id=user_id,
-            message=message))
+            message=blockquote(message)))
     else:
         send_msg.delay(user_id, text=messages.UNKNOWN_MESSAGE_NO_ADMIN)
     return HttpResponse(204)
