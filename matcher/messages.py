@@ -37,7 +37,7 @@ _Respond as the bot by typing_ “<@{user_id}> <your reply>”
 """
 UNKNOWN_MESSAGE_NO_ADMIN = "Sorry, I don’t know how to respond to most messages! 😬 If you have a question or feedback, you can contact my admin."
 INTRO_RECEIVED = "Thanks for the intro, {person.casual_name}! You’ll receive your first pairing at the start of the upcoming round."
-INTRO_RECEIVED_QUESTIONS = "If you have any questions in the meantime, feel free to ask <@{ADMIN_SLACK_USER_ID}>."
+INTRO_RECEIVED_QUESTIONS = "If you have any questions in the meantime, feel free to ask."
 
 BLOCKS = {
     "ASK_IF_MET": [

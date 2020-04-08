@@ -158,8 +158,7 @@ def update_intro(event):
         logger.info(f"Onboarded {person} with intro!")
         message = messages.INTRO_RECEIVED.format(person=person)
         if ADMIN_SLACK_USER_ID:
-            message += (" " + messages.INTRO_RECEIVED_QUESTIONS\
-                .format(ADMIN_SLACK_USER_ID=ADMIN_SLACK_USER_ID))
+            message += (" " + messages.INTRO_RECEIVED_QUESTIONS)
         send_msg.delay(user_id, text=message)
         return HttpResponse(204)
 
