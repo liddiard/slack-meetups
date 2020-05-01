@@ -233,11 +233,16 @@ def ask_availability(round):
         try:
             person = Person.objects.get(user_id=user_id)
             # if the person isn't in this pool, add them and ask for their
-            # availability
+            # availability, or for their intro if they don't have one yet
             if pool not in person.pools.all():
                 PoolMembership.objects.create(person=person, pool=pool)
                 logger.info(f"Added {person} to pool \"{pool}\".")
-                send_availability_question(person, pool)
+                if person.has_intro():
+                    send_availability_question(person, pool)
+                else:
+                    send_msg.delay(user_id,
+                        text=messages.WELCOME_INTRO.format(person=person,
+                        pool=pool))
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
         except Person.DoesNotExist:
