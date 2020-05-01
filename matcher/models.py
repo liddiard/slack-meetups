@@ -243,6 +243,9 @@ def ask_availability(round):
                     send_msg.delay(user_id,
                         text=messages.WELCOME_INTRO.format(person=person,
                         pool=pool))
+                    person.last_query = QUESTIONS["intro"]
+                    person.last_query_pool = pool
+                    person.save()
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
         except Person.DoesNotExist:
