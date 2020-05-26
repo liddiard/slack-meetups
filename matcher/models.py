@@ -51,7 +51,7 @@ class Pool(models.Model):
 class Person(models.Model):
     """corresponds to a Slack user; a single individual
     """
-    user_id = models.CharField(max_length=9, unique=True, db_index=True)
+    user_id = models.CharField(max_length=11, unique=True, db_index=True)
     user_id.help_text = "Slack user ID"
     # Slack user "names" are kind of confusing, may be disappearing, are not
     # guaranteed to be unique... and should we even be storing this? It's
