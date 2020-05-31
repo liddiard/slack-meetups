@@ -106,6 +106,18 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 
 ![matches list](screenshots/matches_list.png)
 
+### View and share the stats page
+
+After you've completed a few rounds of pairing, you might want to take a look at the stats page. Stats pages are automatically generated for each pool and can be found at `<your base url>/stats/<channel-name>`. They display general numerical statistics about the pool, a leaderboard of who has met up with the most people, and a graph showing all pairings. Example screenshots below.
+
+#### Leaderboard
+
+![stats page leaderboard](screenshots/stats_leaderboard.png)
+
+#### Pairings graph, with one person and their pairings highlighted
+
+![stats page pairing graph](screenshots/stats_pairing_graph.png)
+
 ## Known limitations
 
 - The bot's message content is a bit specific in places and may not match your use case. Luckily, all content is stored within `matcher/messages.py` so it's fairly easy to customize if you want to fork the repo.
