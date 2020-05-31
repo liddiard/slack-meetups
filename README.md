@@ -5,11 +5,12 @@ A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet n
 ## Features
 
 - 💬 Requests a custom introduction for each person
-- ❓ Asks availability each round for everyone in the matching pool
+- ❓ Asks availability each round, allowing people to opt in or out of being paired
 - 🎲 Randomly pairs people to meet via direct message
 - 🤝 Collects feedback on who actually met up
+- 🏆 Generates leaderboards and graphs of pairings for each channel
 
-It supports variable frequency and length for rounds of matching, multiple matching "pools", and has an admin interface to manage membership, pools, and matching rounds.
+It supports variable frequency and length for rounds of matching, multiple matching "pools" that can operate independently, it and has an admin interface to manage membership, pools, and matching rounds.
 
 ## Tech stack
 
@@ -105,12 +106,24 @@ From the admin interface, under "Matcher" you can click "Matches" to see a full 
 
 ![matches list](screenshots/matches_list.png)
 
+### View and share the stats page
+
+After you've completed a few rounds of pairing, you might want to take a look at the stats page. Stats pages are automatically generated for each pool and can be found at `<your base url>/stats/<channel-name>`. They display general numerical statistics about the pool, a leaderboard of who has met up with the most people, and a graph showing all pairings. Example screenshots below.
+
+#### Leaderboard
+
+![stats page leaderboard](screenshots/stats_leaderboard.png)
+
+#### Pairings graph, with one person and their pairings highlighted
+
+![stats page pairing graph](screenshots/stats_pairing_graph.png)
+
 ## Known limitations
 
 - The bot's message content is a bit specific in places and may not match your use case. Luckily, all content is stored within `matcher/messages.py` so it's fairly easy to customize if you want to fork the repo.
-- The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message, with a mention to contact the bot's admin, if configured. Having the bot respond to other queries would require some refactoring as it would have to keep track of the last message sent to each user.
-- Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job.
-- On the admin side, there's not a ton of input validation. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these things.
+- The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message unless an admin is configured in the `ADMIN_SLACK_USER_ID` environment variable (see "Configuring the web server" section below). If an admin is defined, they will get a DM with "unknown" queries to the bot and have ability to respond to them as the bot.
+- Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job. For a more robust implementation, matching pool frequencies should probably be stored in the database.
+- On the admin side, there's not a ton of input validation, and there are no pool-specific admin permissions. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these models.
 
 ## Setup instructions
 
