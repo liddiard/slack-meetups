@@ -213,6 +213,10 @@ def handle_unknown_message(user_id, message):
     a direct message to the admin, if defined, otherwise respond with a
     generic "Sorry I don't know how to help you" type of message
     """
+    # if no user ID is attached to the message, do nothing. this happens
+    # sometimes, not sure why
+    if user_id is None:
+        return HttpResponse(204)
     logger.info(f"Received unknown query from {user_id}: \"{message}\".")
     if ADMIN_SLACK_USER_ID:
         send_msg.delay(ADMIN_SLACK_USER_ID,
