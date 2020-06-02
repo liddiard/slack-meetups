@@ -10,7 +10,7 @@ async function main() {
   // update text on the page
   document.title = `${pool.name} statistics`;
   document.getElementById('pool-name').innerText = pool.name;
-  document.getElementById('member-count').innerText = pool.member_count;
+  document.getElementById('participant-count').innerText = pool.participant_count;
   document.getElementById('round-count').innerText = pool.round_count;
   document.getElementById('matches-count').innerText = pool.matches.length;
   document.getElementById('avg-round-size').innerText = Math.round((pool.matches.length * 2) / pool.round_count);
