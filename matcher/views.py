@@ -119,7 +119,7 @@ def get_pool_stats(request, channel_name):
                         [match.person_2.pk for match in matches])
     return JsonResponse({
         "name": pool.name,
-        "member_count": PoolMembership.objects.filter(pool=pool).count(),
+        "participant_count": len(match_people),
         "people": list(Person.objects.filter(pk__in=match_people)\
             .values("id", "full_name")),
         "round_count": Round.objects.filter(pool=pool)\
