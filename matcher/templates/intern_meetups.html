@@ -1,0 +1,53 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Intern Meetups: Make new friends and grow your network at PayPal.</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Intern Meetups is a program to help you get to know other interns through casual 1:1 meetups." />
+        <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
+        <link rel="stylesheet" href="{% static 'styles/landing_page.css' %}" />
+    </head>
+    <body>
+        <main>
+            <header>
+                <img src="{% static 'images/intern_meetups_logo.svg' %}" alt="Intern Meetups logo" class="logo">
+            </header>
+
+            <p>University Programs presents <strong>Intern Meetups</strong>, a program to help you get to know other interns through casual 1:1 meetups.</p>
+            <p>Meet new friends, grow your network, and form meaningful connections with interns from across the company.</p>
+            <p>Pairings happen every week – you can opt in or out based on your availability. Just join <a href="https://app.slack.com/client/T0G9AL7B8/C013F6C34V8/" target="_blank">#intern-meetups</a> to participate. <span class="next-session"></span></p>
+
+            <div class="actions">
+                <a href="https://app.slack.com/client/T0G9AL7B8/C013F6C34V8/" target="_blank" class="button">Join #intern-meetups</a>
+            </div>
+
+            <h2>How does the program work?</h2>
+            <p>After joining the Slack channel, you’ll receive a message at the start of the next pairing round asking for an introduction.</p>
+            <img src="{% static 'images/first_interaction.png' %}" alt="First interaction with Intern Meetups bot – welcome and introduction" class="inline" />
+            <p>After introducing yourself, you’ll receive your first pairing.</p>
+            <img src="{% static 'images/receive_match.png' %}" alt="Receiving a match from the bot" class="inline" />
+            <p>Message the intern you pair with to meet up!</p>
+            <img src="{% static 'images/message_match.png' %}" alt="Messaging the person you matched with" class="inline" />
+            <p>For following rounds, you’ll be asked if you want to be paired with someone new this week.</p>
+            <img src="{% static 'images/ask_availability.png' %}" alt="Intern Meetups bot asking if you want to participat in the next round" class="inline" style="padding: 0.5em" />
+            <p>Pairing rounds start the first day of each week during the intern season. If at any point you want to leave the program, simply leave the Slack channel.</p>
+
+            <h2>Why Intern Meetups?</h2>
+            <p>The goal of Intern Meetups is to to help you make new friends and grow your network at PayPal.</p>
+            <p>It can be difficult to get to know other interns virtually. Participating in Intern Meetups gives you more familiar faces and great connections that can be harder to form on a large virtual meeting.</p>
+            <p>1:1 meetups also help you gain insight into different parts of the company. You might even find someone you have a lot in common with who you wouldn’t have met otherwise!</p>
+            <p>Participate by joining the channel. <span class="next-session"></span></p>
+
+            <div class="actions">
+                <a href="https://app.slack.com/client/T0G9AL7B8/C013F6C34V8/" target="_blank" class="button">Join #intern-meetups</a>
+            </div>
+
+            <h2>Questions?</h2>
+            <p>Feel free to ask questions in the <a href="https://app.slack.com/client/T0G9AL7B8/C013F6C34V8/" target="_blank">#intern-meetups</a> Slack channel.</p>
+        </main>
+        <script src="{% static 'scripts/intern.js' %}"></script>
+    </body>
+</html>

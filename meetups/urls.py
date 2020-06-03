@@ -30,5 +30,7 @@ urlpatterns = [
         name="pool_stats_page"),
     path("rcg/", TemplateView.as_view(template_name="rcg_meetups.html"),
         name="rcg_meetups"),
+    path("intern/", TemplateView.as_view(template_name="intern_meetups.html"),
+        name="intern_meetups"),
     path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
 ]
