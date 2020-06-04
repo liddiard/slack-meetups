@@ -117,13 +117,17 @@ def update_intro(event, person):
     user_id = event.get("user")
     message_text = event.get("text", "")
     person.intro = message_text
-    person.last_query = None
-    person.last_query_pool = None
-    person.save()
     # automatically set the Person to available for their first time
     # if people have an issue with this, they can contact
     # `ADMIN_SLACK_USER_ID`. Might revisit if this causes issues.
-    PoolMembership.objects.filter(person=person).update(available=True)
+    pool_membership = PoolMembership.objects.get(person=person,
+        pool=person.last_query_pool)
+    pool_membership.available = True
+    pool_membership.save()
+    # reset the person's last query
+    person.last_query = None
+    person.last_query_pool = None
+    person.save()
     logger.info(f"Onboarded {person} with intro!")
     message = messages.INTRO_RECEIVED.format(person=person)
     if ADMIN_SLACK_USER_ID:
