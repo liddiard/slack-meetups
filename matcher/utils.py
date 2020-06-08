@@ -54,7 +54,9 @@ def determine_yes_no_answer(message):
     """
     yes_words = ["yes", "y", "yeah", "yea", "yep", "yus", "yas", "sure",
                  "absolutely", "did"]
-    no_words = ["no", "n", "nope", "nah", "not", "didn't"]
+    # note: "didn" below will match the text "didn't" becuase the function
+    # changes non-word characters like apostrophes to spaces; e.g. "didn t"
+    no_words = ["no", "n", "nope", "nah", "not", "didn"]
     yes_response = False
     no_response = False
     # lowercase all characters in the string
