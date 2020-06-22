@@ -1,4 +1,4 @@
-Django==2.2.10
+Django==2.2.13
 slackclient==2.1.0
 celery==4.4.2
 
