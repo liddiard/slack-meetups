@@ -143,7 +143,6 @@ def ask_if_met(_, user_id, pool_id):
         # message
         return HttpResponse(204)
     latest_match = user_matches.latest("round__end_date")
-    print("latest_match", latest_match, latest_match.met)
     # if the Person or their match hasn't already provided feedback on their
     # last match, continue to ask if they met
     if latest_match.met is None:

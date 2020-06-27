@@ -190,14 +190,12 @@ def create_matches(round, people_to_match):
       non-duplicate options for matches may have been "used up" in previous
       interations of the loop whne we get to the final few people to match.
     """
-    print(f"people to match: {people_to_match}")
     # cast the QuerySet to a Set to avoid mutating the variable over which
     # we'll be iterating
     available_people = set(people_to_match)
     for person in people_to_match:
         if person not in available_people:
             # this person is already matched; do nothing
-            print(f"skipping loop for {person}")
             continue
 
         # remaining people available to match, excluding this person (you
@@ -218,17 +216,14 @@ def create_matches(round, people_to_match):
             # if there are non-duplicate matches available at ths point, match
             # this person with one of them
             potential_matches = nonduplicate_matches
-            print(f"non-duplicate matches for {person}: {potential_matches}")
         else:
             # otherwise, match them with anyone still available to match
             logger.warn(f"No non-duplicate matches available for {person}.")
-            print(f"duplicate matches for {person}: {potential_matches}")
         # pick an arbitrary person from the available options
         # N.B. this is different than a "random" person in the sense of
         # picking a random element from the set; it's simply the first person
         # pointed to by the set iterator
         other_person = get_set_element(potential_matches)
-        print(f"other person for {person}: {other_person}")
         new_match = Match(person_1=person, person_2=other_person, round=round)
         # save the match and send matching messages
         new_match.save()
