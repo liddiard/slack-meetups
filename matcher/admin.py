@@ -177,7 +177,7 @@ def create_matches(round, people_to_match):
       participants
     - the space complexity of this function is O(N+M) where N is the number of
       participants and M is the highest number of past matches an individual
-      participant has
+      participant has had
     - the pairing algorithm may not prevent duplicate pairings in certain
       cases where a "solution" was possible that didn't involve duplicates,
       because such an algorithm would be significantly more complex and have a
@@ -186,7 +186,7 @@ def create_matches(round, people_to_match):
       ordered. this is due to the fact that people toward the end of the loop
       have a higher chance of receiving a duplicate match because there are
       fewer unmatched people remaining to choose from, and this is a greedy
-      algorithm that doesn't backtrack. phrased anothre way, all of the 
+      algorithm that doesn't backtrack. phrased another way, all of the
       non-duplicate options for matches may have been "used up" in previous
       interations of the loop whne we get to the final few people to match.
     """
