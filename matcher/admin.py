@@ -76,7 +76,7 @@ class PersonAdmin(admin.ModelAdmin):
     readonly_fields = ("pools", "joined")
     list_filter = (IntroListFilter, "pools", AvailabilityListFilter)
     ordering = ("-joined",)
-    search_fields = ("user_name", "full_name", "casual_name")
+    search_fields = ("user_id", "user_name", "full_name", "casual_name")
 
 
 @admin.register(PoolMembership, site=ADMIN_SITE)
