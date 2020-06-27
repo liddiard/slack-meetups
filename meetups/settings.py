@@ -33,8 +33,7 @@ else:
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "08db7184.ngrok.io",
-    "slack-meetups.appspot.com"
+    ".ngrok.io"
 ]
 
 
@@ -134,14 +133,26 @@ STATIC_ROOT = "static"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "{levelname} [{asctime}] {message}",
+            "style": "{",
+        },
+        "verbose": {
+            "format": "{levelname} [{asctime}] {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        }
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "stream": sys.stdout
+            "stream": sys.stdout,
+            "formatter": "simple"
         },
         "file": {
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "app.log"),
+            "formatter": "verbose"
         },
     },
     "loggers": {

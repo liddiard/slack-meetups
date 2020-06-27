@@ -7,20 +7,12 @@ import re
 MENTION_PATTERN = r"(?:^\s?<@(.*?)>\s?)|(?:^\s?<#(.*?)\|.*?>\s?)"
 
 
-# http://code.activestate.com/recipes/303060-group-a-list-into-sequential-n-tuples/
-def group(lst, n):
-    """group a list into consecutive n-tuples
-    
-    >>> group(range(10), 3)
-    [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
-    
-    >>> group([0, 3, 4, 10, 2, 3], 2)
-    [(0, 3), (4, 10), (2, 3)]
+def get_set_element(_set):
+    """get the element from the set to which the iterator points; returns an
+    arbitrary item
     """
-    if (len(lst) % n != 0):
-        raise ValueError(f"Provided list of length {len(lst)} is not "
-            f"divisible by {n}")
-    return zip(*[lst[i::n] for i in range(n)]) 
+    for element in _set:
+        return element
 
 
 def get_person_from_match(user_id, match):

@@ -11,7 +11,7 @@ from django.contrib.auth.admin import GroupAdmin
 from django.http import HttpResponse
 
 from .models import Pool, Person, PoolMembership, Round, Match
-from .utils import group
+from .utils import get_set_element, get_other_person_from_match
 
 
 logger = logging.getLogger(__name__)
@@ -125,18 +125,17 @@ class MatchAdmin(admin.ModelAdmin):
 
 # readd the built-in "authentication and authorization" models to our custom
 # admin site
-# note: it's important to register Users and Groups with their respective 
-# admins, otherwise they will be missing important methods like the one to 
+# note: it's important to register Users and Groups with their respective
+# admins, otherwise they will be missing important methods like the one to
 # hash User passwords, see: https://stackoverflow.com/a/32852793
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 
 
-def match(round):
-    """make random pairings for all participants who've opted in (responded
-    saying they're available) for the current round. this function will also
-    cause matching messages to be send in each Match.save() call. one person
-    won't recieve a Match if there are an odd number of People in the Round.
+def get_round_participants(round):
+    """return a randomly-ordered queryset of participants for this Round.
+    excludes someone if there are an odd number, and throws and error if no
+    one is marked as excludable
     """
     # don't rematch if matches already exist for this round
     existing_matches = Match.objects.filter(round=round).count()
@@ -144,7 +143,8 @@ def match(round):
         raise Exception(f"{existing_matches} matches already exist for this "
             "round. If you want to rematch, please delete the existing "
             "matches for this round first.")
-    # randomly order the people for random matching
+    # randomly order the people for "fairer" matching, see `create_matches`
+    # function docstring
     # note: this can be a slow query for large tables
     people_to_match = Person.objects\
         .filter(pools=round.pool, poolmembership__available=True)\
@@ -165,12 +165,87 @@ def match(round):
         people_to_match = people_to_match.exclude(id=person_to_exclude.id)
         logger.info(f"Odd number of people ({len(people_to_match)}) for round "
             f"\"{round}\", excluded {person_to_exclude}.")
-    # match adjacent people in our randomly-ordered list
-    # IMPORTANT: list must have an even length before calling `group` below
-    for pair in group(people_to_match, 2):
-        match = Match(person_1=pair[0], person_2=pair[1], round=round)
-        match.save()
-        logger.info(f"Matched: {match}")
+    return people_to_match
+
+
+def create_matches(round, people_to_match):
+    """given a queryset of people to match, creates matches with a bias toward
+    matching people with those they haven't been paired with before (avoiding
+    duplicates), where feasible.
+    Important considerations:
+    - the time complexity of this function is O(N^2) where N is the number of
+      participants
+    - the space complexity of this function is O(N+M) where N is the number of
+      participants and M is the highest number of past matches an individual
+      participant has
+    - the pairing algorithm may not prevent duplicate pairings in certain
+      cases where a "solution" was possible that didn't involve duplicates,
+      because such an algorithm would be significantly more complex and have a
+      higher time complexity
+    - the `people_to_match` passed to this function should be randomly
+      ordered. this is due to the fact that people toward the end of the loop
+      have a higher chance of receiving a duplicate match because there are
+      fewer unmatched people remaining to choose from, and this is a greedy
+      algorithm that doesn't backtrack. phrased anothre way, all of the 
+      non-duplicate options for matches may have been "used up" in previous
+      interations of the loop whne we get to the final few people to match.
+    """
+    print(f"people to match: {people_to_match}")
+    # cast the QuerySet to a Set to avoid mutating the variable over which
+    # we'll be iterating
+    available_people = set(people_to_match)
+    for person in people_to_match:
+        if person not in available_people:
+            # this person is already matched; do nothing
+            print(f"skipping loop for {person}")
+            continue
+
+        # remaining people available to match, excluding this person (you
+        # can't be matched with yourself)
+        potential_matches = available_people - set([person])
+
+        # get the person's past matches, regardless of pool
+        past_matches = (Match.objects.filter(person_1=person) |
+                        Match.objects.filter(person_2=person))
+        past_match_people = {
+            get_other_person_from_match(person.user_id, match)
+            for match in past_matches
+        }
+
+        # set difference; a new set of other people this person hasn't yet met
+        nonduplicate_matches = potential_matches - past_match_people
+        if nonduplicate_matches:
+            # if there are non-duplicate matches available at ths point, match
+            # this person with one of them
+            potential_matches = nonduplicate_matches
+            print(f"non-duplicate matches for {person}: {potential_matches}")
+        else:
+            # otherwise, match them with anyone still available to match
+            logger.warn(f"No non-duplicate matches available for {person}.")
+            print(f"duplicate matches for {person}: {potential_matches}")
+        # pick an arbitrary person from the available options
+        # N.B. this is different than a "random" person in the sense of
+        # picking a random element from the set; it's simply the first person
+        # pointed to by the set iterator
+        other_person = get_set_element(potential_matches)
+        print(f"other person for {person}: {other_person}")
+        new_match = Match(person_1=person, person_2=other_person, round=round)
+        # save the match and send matching messages
+        new_match.save()
+        # remove both newly matched people from the set of available people to
+        # match
+        available_people.remove(person)
+        available_people.remove(other_person)
+
+
+def match(round):
+    """make pairings for all participants who've opted in (responded saying
+    they're available) for the current round. this function will also cause
+    matching messages to be send in each Match.save() call. one person won't
+    recieve a Match if there are an odd number of People in the Round.
+    """
+    people_to_match = get_round_participants(round)
+    create_matches(round, people_to_match)
 
 
 def download_pool_members(pool):
@@ -182,7 +257,7 @@ def download_pool_members(pool):
     response["Content-Disposition"] = "attachment; "\
         f"filename=\"{pool.name} members ({date.today()}).csv\""
     writer = csv.writer(response)
-    # write a header row describing the columns
+    # start with a header row describing the columns
     writer.writerow(["User ID", "User name", "Full name", "Has intro"])
     for person in members:
         writer.writerow([person.user_id, person.user_name, person.full_name,
