@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import date
 
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.cache import cache_page
@@ -191,8 +192,11 @@ def update_met(event, person):
         return JsonResponse(status=404,
             data={"error": f"user \"{person.user_id}\" does not have any "
                 "matches"})
-    # assuming that the user is reporting on their latest match
-    match = user_matches.latest("round__end_date")
+    # exclude any ongoing/future rounds (rounds that haven't ended)
+    past_matches = user_matches.exclude(round__end_date__gt=date.today())
+    # assume that the user is reporting on their latest match from a round in
+    # the past
+    match = past_matches.latest("round__end_date")
     if match.met is not None and match.met != met:
         logger.warning(f"Conflicting \"met\" info for match \"{match}\". "
             f"Original value was {match.met}, new value from {person} is "
