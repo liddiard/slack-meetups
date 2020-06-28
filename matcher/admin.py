@@ -190,6 +190,9 @@ def create_matches(round, people_to_match):
       non-duplicate options for matches may have been "used up" in previous
       interations of the loop whne we get to the final few people to match.
     """
+    if (len(people_to_match) % 2 != 0):
+        raise ValueError(f"`people_to_match` must have an even-numbered "
+            f"length. Received length: {len(people_to_match)}.")
     # cast the QuerySet to a Set to avoid mutating the variable over which
     # we'll be iterating
     available_people = set(people_to_match)
