@@ -230,6 +230,7 @@ def create_matches(round, people_to_match):
         new_match = Match(person_1=person, person_2=other_person, round=round)
         # save the match and send matching messages
         new_match.save()
+        logger.info(f"Matched: {new_match}")
         # remove both newly matched people from the set of available people to
         # match
         available_people.remove(person)
