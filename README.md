@@ -4,11 +4,11 @@ A Slack bot that randomly pairs users in a Slack channel for 1:1 meetups. Meet n
 
 ## Features
 
-- 💬 Requests a custom introduction for each person
-- ❓ Asks availability each round, allowing people to opt in or out of being paired
-- 🎲 Randomly pairs people to meet via direct message
-- 🤝 Collects feedback on who actually met up
-- 🏆 Generates leaderboards and graphs of pairings for each channel
+- 💬  Requests a custom introduction for each person
+- ❓  Asks availability each round, allowing people to opt in or out of being paired
+- 🎲  Randomly pairs people to meet via direct message
+- 🤝  Collects feedback on who actually met up
+- 🏆  Generates leaderboards and graphs of pairings for each channel
 
 It supports variable frequency and length for rounds of matching, multiple matching "pools" that can operate independently, it and has an admin interface to manage membership, pools, and matching rounds.
 
