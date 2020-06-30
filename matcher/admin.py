@@ -163,8 +163,8 @@ def get_round_participants(round):
                 "pool is both available and can be excluded.")
         person_to_exclude = random.choice(excludable_people)
         people_to_match = people_to_match.exclude(id=person_to_exclude.id)
-        logger.info(f"Odd number of people ({len(people_to_match)}) for round "
-            f"\"{round}\", excluded {person_to_exclude}.")
+        logger.info(f"Odd number of people ({len(people_to_match) + 1}) for "
+            f"round \"{round}\", excluded {person_to_exclude}.")
     return people_to_match
 
 
