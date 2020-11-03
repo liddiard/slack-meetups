@@ -7,7 +7,8 @@ from django.views.decorators.cache import cache_page
 
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
-from .models import Person, Match, Pool, PoolMembership, Round
+from .models import (Person, Match, Pool, PoolMembership, Round,
+                     get_channel_members as get_channel_members_list)
 from .tasks import  send_msg, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
                     blockquote, get_mention, remove_mention,
@@ -244,3 +245,10 @@ def send_message_as_bot(message):
         send_msg.delay(channel_id, text=message)
         logger.info(f"Sent message to {channel_id} as bot: \"{message}\".")
     return HttpResponse(204)
+
+
+def get_channel_members(request, channel_id):
+    """utility view function to return a list of members from the provided
+    channel ID
+    """
+    return HttpResponse("\n".join(get_channel_members_list(channel_id)))
