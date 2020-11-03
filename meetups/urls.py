@@ -33,5 +33,7 @@ urlpatterns = [
         name="rcg_meetups"),
     path("intern/", TemplateView.as_view(template_name="intern_meetups.html"),
         name="intern_meetups"),
+    path("utils/members/<channel_id>/", views.get_channel_members,
+        name="channel_members"),
     path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
 ]
