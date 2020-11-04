@@ -9,7 +9,7 @@ import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
 from .models import (Person, Match, Pool, PoolMembership, Round,
                      get_channel_members as get_channel_members_list)
-from .tasks import  send_msg, ask_if_met
+from .tasks import client, send_msg, ask_if_met
 from .utils import (get_person_from_match, get_other_person_from_match,
                     blockquote, get_mention, remove_mention,
                     determine_yes_no_answer)
