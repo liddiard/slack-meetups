@@ -251,11 +251,11 @@ def get_channel_members(request, channel_id):
     """utility view function to return a list of members from the provided
     channel ID
     """
-    member_ids = []
+    members = []
     for member in get_channel_members_list(channel_id):
-        member_ids.append(client.users_info(user=member).get("user"))
-    member_usernames = "\n".join([
+        members.append(client.users_info(user=member).get("user"))
+    member_emails = "\n".join([
         user["profile"]["email"] for user in members
         if user["profile"].get("email") is not None
     ])
-    return HttpResponse(member_usernames, content_type="text/plain")
+    return HttpResponse(member_emails, content_type="text/plain")
