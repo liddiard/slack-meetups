@@ -45,7 +45,7 @@ def determine_yes_no_answer(message):
     unable to determine.
     """
     yes_words = ["yes", "y", "yeah", "yea", "yep", "yus", "yas", "sure",
-                 "absolutely", "do", "did", "yup", "yeap"]
+                 "absolutely", "do", "did", "yup", "yeap", "ok", "okay"]
     # note: "didn" below will match the text "didn't" becuase the function
     # changes non-word characters like apostrophes to spaces; e.g. "didn t"
     no_words = ["no", "n", "nope", "nah", "not", "didn"]
