@@ -19,7 +19,7 @@ class Command(BaseCommand):
             except Pool.DoesNotExist:
                 raise CommandError(f"Pool \"{channel_id}\" does not exist.")
 
-            latest_round = Round.objects.filter(pool=pool).latest('end_date')
+            latest_round = Round.objects.filter(pool=pool).latest('start_date')
             if not latest_round:
                 raise CommandError(f"No rounds exist for pool \"{channel_id}\".")
             
