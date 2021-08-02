@@ -5,7 +5,9 @@ from matcher.admin import match
 
 
 class Command(BaseCommand):
-    help = "Make matches for the latest round in the specified pools."
+    help = "Make matches for the latest round in the specified pools. "\
+        "Syntax: python3 manage.py do_round_matching <channel_ids> "\
+        "(separate channel_ids with spaces)"
 
     def add_arguments(self, parser):
         parser.add_argument('channel_ids', nargs='+', type=str)
@@ -30,5 +32,5 @@ class Command(BaseCommand):
             match(latest_round)
 
             self.stdout.write(
-                self.style.SUCCESS(f"Successfully triggered matching for round \"{latest_round}\"")
+                self.style.SUCCESS(f"Successfully made matches for round \"{latest_round}\"")
             )

@@ -5,7 +5,8 @@ from matcher.models import Pool, Round
 
 class Command(BaseCommand):
     help = "Creates a round of matching, thereby asking participants of the"\
-        "specified pools for their availability."
+        "specified pools for their availability. Syntax: python3 manage.py "\
+        "create_round <channel_ids> (separate channel_ids with spaces)"
 
     def add_arguments(self, parser):
         parser.add_argument('channel_ids', nargs='+', type=str)
