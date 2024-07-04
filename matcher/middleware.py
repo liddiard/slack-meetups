@@ -18,8 +18,15 @@ class VerifySlackRequest:
     # using old-style middleware to allow us to use a per-view decorator
     # (we only want this verification on Slack views, not places like admin)
     # see: https://docs.djangoproject.com/en/2.2/ref/utils/#django.utils.decorators.decorator_from_middleware
-    # https://docs.djangoproject.com/en/1.9/topics/http/middleware/#process_request
 
+    # added in Django 5 upgrade per fix: https://stackoverflow.com/a/55779583
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+    
+    # https://docs.djangoproject.com/en/1.9/topics/http/middleware/#process_request
     def process_request(self, request):
         # implementation partially from:
         # https://janikarhunen.fi/verify-slack-requests-in-aws-lambda-and-python
