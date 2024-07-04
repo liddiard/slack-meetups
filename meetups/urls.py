@@ -39,7 +39,3 @@ urlpatterns = [
         name="channel_members"),
     path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
 ]
-
-# serve static files when running with gunicorn in debug mode
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
