@@ -127,12 +127,7 @@ After you've completed a few rounds of pairing, you might want to take a look at
 
 ## Setup instructions
 
-### Prerequisites
-
-- Ensure you have Python 3.7+ installed
-- Install [RabbitMQ](https://www.rabbitmq.com/download.html)
-
-### Slack setup
+### Slack API
 
 #### Create the app
 
@@ -204,6 +199,13 @@ After you've completed a few rounds of pairing, you might want to take a look at
 2. Run `docker compose up` (add `-d` to run in the background)
 
 ### Running without Docker
+
+#### Prerequisites
+
+- Ensure you have Python 3.7+ installed
+- Install [RabbitMQ](https://www.rabbitmq.com/download.html)
+
+#### Installation
 
 1. create a virtualenv folder: `mkdir meetups`
 2. [install the virtualenv](https://docs.python.org/3/library/venv.html): `python3 -m venv meetups`
