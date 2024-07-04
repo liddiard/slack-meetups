@@ -1,6 +1,9 @@
-Django==2.2.24
-slackclient==2.1.0
-celery==4.4.2
+Django==5.0.6
+slackclient==2.9.4
+celery==5.4.0
+gunicorn
+pytz
 
 # development dependencies
-pylint-django==2.0.14
+pylint-django==2.5.5
+python-dotenv==1.0.1
