@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import sys
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,18 +27,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # intentionally raise KeyError if missing
-SECRET_KEY = os.environ["SECRET_KEY"]
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if "DEBUG" in os.environ:
-    DEBUG = True
-else:
-    DEBUG = False
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    ".ngrok.io"
+    ".ngrok.io",
+    ".lhr.life" # https://localhost.run
 ]
 
 
@@ -88,6 +91,9 @@ DATABASES = {
     }
 }
 
+# https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-DEFAULT_AUTO_FIELD
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -113,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "America/Los_Angeles"
+TIME_ZONE = "America/New_York"
 
 USE_I18N = True
 
@@ -125,9 +131,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
 
-STATIC_ROOT = "static"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 LOGGING = {
@@ -165,14 +171,14 @@ LOGGING = {
 }
 
 # Celery config
-CELERY_BROKER_URL = "pyamqp://guest@localhost//"
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672//"
 
 
 # token comes from this page: https://api.slack.com/apps/AH99D6ZLH/install-on-team
-SLACK_API_TOKEN = os.environ["SLACK_API_TOKEN"]
+SLACK_API_TOKEN = os.getenv("SLACK_API_TOKEN")
 
 # signing secret comes from this page: https://api.slack.com/apps/AH99D6ZLH
-SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
+SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
 # Slack user ID of the admin for this Slack application who users should reach
 # out to if they have questions
