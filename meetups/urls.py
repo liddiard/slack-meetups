@@ -23,6 +23,7 @@ from matcher import views
 
 
 urlpatterns = [
+    path("", TemplateView.as_view(template_name="index.html"), name="home"),
     path("admin/", admin.site.urls, name="admin"),
     path("slack/action/", views.handle_slack_action, name="slack_action"),
     path("slack/message/", views.handle_slack_message, name="slack_message"),
@@ -31,11 +32,6 @@ urlpatterns = [
     path("stats/<channel_name>/",
         TemplateView.as_view(template_name="pool_stats.html"),
         name="pool_stats_page"),
-    path("rcg/", TemplateView.as_view(template_name="rcg_meetups.html"),
-        name="rcg_meetups"),
-    path("intern/", TemplateView.as_view(template_name="intern_meetups.html"),
-        name="intern_meetups"),
     path("utils/members/<channel_id>/", views.get_channel_members,
-        name="channel_members"),
-    path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
+        name="channel_members")
 ]
