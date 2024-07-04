@@ -35,6 +35,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "meetups.harrisonliddiard.com",
     ".ngrok.io",
     ".lhr.life" # https://localhost.run
 ]
