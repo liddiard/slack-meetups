@@ -14,6 +14,7 @@ services:
       - celery
     networks:
       - app-network
+    restart: unless-stopped
 
   celery:
     container_name: celery
@@ -27,6 +28,7 @@ services:
       - rabbitmq
     networks:
       - app-network
+    restart: unless-stopped
 
   rabbitmq:
     container_name: rabbitmq
@@ -36,6 +38,7 @@ services:
       - "5672:5672"    # RabbitMQ default port
     networks:
       - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
