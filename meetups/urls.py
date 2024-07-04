@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView, RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 from matcher import views
 
@@ -37,3 +39,7 @@ urlpatterns = [
         name="channel_members"),
     path("", RedirectView.as_view(pattern_name="rcg_meetups"), name="root")
 ]
+
+# serve static files when running with gunicorn in debug mode
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
