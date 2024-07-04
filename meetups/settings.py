@@ -40,6 +40,10 @@ ALLOWED_HOSTS = [
     ".lhr.life" # https://localhost.run
 ]
 
+# https://docs.djangoproject.com/en/5.0/ref/settings/#csrf-trusted-origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://meetups.harrisonliddiard.com",
+]
 
 # Application definition
 
