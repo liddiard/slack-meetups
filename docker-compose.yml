@@ -1,0 +1,42 @@
+services:
+  django:
+    container_name: django
+    entrypoint: /app/entrypoint.sh
+    build: .
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+      - celery
+    networks:
+      - app-network
+
+  celery:
+    container_name: celery
+    build: .
+    command: celery -A matcher.tasks worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672"  # RabbitMQ management console
+      - "5672:5672"    # RabbitMQ default port
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

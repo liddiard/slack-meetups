@@ -125,9 +125,7 @@ After you've completed a few rounds of pairing, you might want to take a look at
 - Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job. For a more robust implementation, matching pool frequencies should probably be stored in the database.
 - On the admin side, there's not a ton of input validation, and there are no pool-specific admin permissions. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these models.
 
-## Setup instructions for local development
-
-These instructions are intended for setting up Slack Meetups on your personal computer for development.
+## Setup instructions
 
 ### Prerequisites
 
@@ -191,7 +189,21 @@ These instructions are intended for setting up Slack Meetups on your personal co
 1. Under Settings > Basic Information > App Credentials, **Show** the Signing Secret. This key allows the bot (the web server you will set up below) to verify that the incoming request is actually coming from Slack. It corresponds to the `SLACK_SIGNING_SECRET` value referenced below. 
 2. Copy it and store it securely.
 
-### Installation
+### Environment variable setup
+
+1. In the top level of the repo, run `cp .env.example .env`
+2. Edit the `.env` example to fill in environment variables, including:
+  - `SECRET_KEY`: required; a long random string for Django's cryptography
+  - `SLACK_API_TOKEN`: required; a bot token to connect to Slack, usually starts with "xoxb-"
+  - `SLACK_SIGNING_SECRET`: required; used to verify that requests are from Slack
+  - `ADMIN_SLACK_USER_ID`: optional; Slack user ID for the admin who will be messaged if the bot receives a message it doesn't know how to act on
+
+### Running with Docker (recommended)
+
+1. [Install Docker](https://docs.docker.com/get-docker/)
+2. Run `docker compose up` (add `-d` to run in the background)
+
+### Running without Docker
 
 1. create a virtualenv folder: `mkdir meetups`
 2. [install the virtualenv](https://docs.python.org/3/library/venv.html): `python3 -m venv meetups`
@@ -200,21 +212,16 @@ These instructions are intended for setting up Slack Meetups on your personal co
 5. `cd [repo]`
 6. `pip3 install -r requirements.txt`
 
-### Configuring the web server
+#### Configuring the web server
 
-1. Create and set required environment variables in a `.env` file at the top level of the repo: 
-  - `SECRET_KEY` (required; a long random string for Django's cryptography)
-  - `SLACK_API_TOKEN` (required; a bot token to connect to Slack, usually starts with "xoxb-")
-  - `SLACK_SIGNING_SECRET` (required; used to verify that requests are from Slack)
-  - `ADMIN_SLACK_USER_ID` (optional; Slack user ID for the admin who will be messaged if the bot receives a message it doesn't know how to act on)
-2. `python manage.py collectstatic` to move static files for serving
-3. `python manage.py makemigrations matcher` to set up migrations to create the database tables
-5. `python manage.py migrate` to create the database tables
-5. `python manage.py createsuperuser` to create your user to log in to the admin
-6. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups.wsgi`.
-7. Log in to the admin and follow the steps above to set up a matching pool. The admin URL is `<your base url>:<port number>/admin/`.
+1. `python manage.py collectstatic` to move static files for serving
+2. `python manage.py makemigrations matcher` to set up migrations to create the database tables
+3. `python manage.py migrate` to create the database tables
+4. `python manage.py createsuperuser` to create your user to log in to the admin
+5. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups.wsgi`.
+6. Log in to the admin and follow the steps above to set up a matching pool. The admin URL is `<your base url>:<port number>/admin/`.
 
-### Configuring the Celery task queue
+#### Configuring the Celery task queue
 
 In order to send Slack messages from the bot, you also need to run a Celery task queue. This queue allows the bot to send messages asyncronously and retry if sending fails, which can happen if there are network issues or the bot gets rate-limited by the Slack API.
 
@@ -226,38 +233,38 @@ After installing RabbitMQ (see Setup above), do the following:
 
 ## Setup for production deployment
 
-Your setup for running Slack Meetups on a production server is largely up to you, but here's some info on how I have it set up as a reference point:
+I recommend using Docker for production deployment, following similar instructions as above. In the `.env` file, make sure you also have `DEBUG=False` for security.
 
-- I'm using Apache to proxy requests to the Django web server. Nginx would probably also be a good choice.
-- I'm running the Django web server with [Gunicorn](https://gunicorn.org/). You shouldn't use the Django development server (`python manage.py runserver`) in production, and Gunicorn is pretty easy to set up.
+In production, you should run the app behind a proxy server. I recommend Nginx. Here's an example config:
 
-Other than that, my production deployment serving a few hundred users weekly is mostly the same as the development setup. I'm using the `rtm` branch of this project (mentioned in the "Tech Stack" section above), so I also have a Node.js proxy server running. Here's the full list of commands I run on server startup. You may have a different setup for your needs, so this is just for reference:
+```Nginx
+server {
+    listen 80;
+
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://django:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /static/ {
+        alias /app/static/;
+    }
+}
+```
+
+### `rtm` branch considerations
+
+The real-time messaging branch also requires a Node.js proxy server to forward the socket-based requests to Django over HTTP. You can modify the `docker-compose.yml` to add a Node service there, or run it manually:
 
 ```shell
-# RabbitMQ server (backend for async task queue; this may be running automatically)
-sudo su
-rabbitmq-server
-
-# Celery (Python async task processor)
-cd meetups; source bin/activate; cd repo/
-celery -A matcher.tasks worker --loglevel=info
-
-# Django server (web application server)
-cd meetups; source bin/activate; cd repo/
-DEBUG=1 gunicorn meetups.wsgi # Note: running in debug mode isn't recommended in an untrusted environment because it will let end users see stack traces, thus exposing your code.
-
-# RTM Proxy (Node.js proxy to forward socket-based requests to the Django web application server as HTTP requests)
 cd meetups; source bin/activate; cd repo/rtmProxy
+npm install
 npm start
-
-# Django shell (optional)
-cd meetups; source bin/activate; cd repo/
-python3 manage.py shell
-
-# Apache logs (optional)
-cd /var/log/apache2
-tail -f error.log access.log
-
 ```
 
 ---
