@@ -116,6 +116,20 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# File Storage
+# https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-STORAGES
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        # https://whitenoise.readthedocs.io/en/stable/django.html#add-compression-and-caching-support
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
