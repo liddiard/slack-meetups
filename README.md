@@ -200,6 +200,8 @@ After you've completed a few rounds of pairing, you might want to take a look at
 
 ### Running without Docker
 
+*You can ignore this section if you're using the Docker-based setup.*
+
 #### Prerequisites
 
 - Ensure you have Python 3.7+ installed
