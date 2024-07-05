@@ -280,7 +280,7 @@ Do you need to use the Slack [Real-Time Messaging (RTM) API](https://api.slack.c
 
 The RTM API doesn't support Slack's interactive components like action buttons, so they are replaced with having users just type a "yes"/"no" response to the bot.
 
-On the `rtm` branch, there is a Node.js proxy server under `rtmProxy/` that connects to the socket-based RTM API and forwards events to the Django server. To run it, you can modify the [`docker-compose.yml`](docker-compose.yml) to add a Node service there, or run it manually:
+On the `rtm` branch, there is a Node.js proxy server under `rtmProxy/` that connects to the socket-based RTM API and forwards Slack events to the Django server as HTTP requests. To run it, you can modify the [`docker-compose.yml`](docker-compose.yml) to add a Node service there, or run it manually:
 
 1. Install Node.js
 2. `cd rtmProxy`
