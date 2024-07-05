@@ -137,12 +137,16 @@ After you've completed a few rounds of pairing, you might want to take a look at
 
 #### Enable interactivity
 
+_Come back to this section later if you don't have a server URL yet._
+
 1. Under Settings > Basic Information > Building Apps for Slack > Add features and functionality, click **Interactive Components**.
 2. Toggle Interactivity to **ON**.
 3. Enter a base **Request URL**, appended with `/slack/action/`. This URL needs to be publicly accessible, so for local development I recommend using [ngrok](https://ngrok.com/) or [localhost.run](https://localhost.run/).
 4. **Save Changes**.
 
 #### Enable events
+
+_Come back to this section later if you don't have a server URL yet._
 
 1. Under Settings > Basic Information > Building Apps for Slack > Add features and functionality, click **Event Subscriptions**.
 2. Toggle Enable Events to **ON**.
@@ -261,16 +265,16 @@ server {
 
 If you want to do recurring matching rounds in a Slack channel and don't want to have to manually log into the admin and press buttons to do it every time, follow these instructions:
 
-1. After creating a matching pool (see User Guide above), open the `cron-jobs` file at the top of the repo.
+1. After creating a matching pool (see User Guide above), open the [`cron-jobs`](cron-jobs) file at the top of the repo.
 2. Uncomment the lines containing `create_round` (for automated round creation – asking availability), and `do_round_matching` (to make 1:1 matches after people have had time to respond).
 3. Set the schedule on which you want each of these things to happen using [cron syntax](https://crontab.guru/#0_10_*_*_1), such as `0 10 * * 1` for 10:00am (server time) every Monday.
-4. Replace the example channel ID (`C07AA3ZH0Q5`) with the one from your matching pool. You can also provide multiple channel IDs separated by spaces.
+4. Replace the example channel IDs (`C07AA3ZH0Q5`) with the one from your matching pool. You can also provide multiple channel IDs separated by spaces.
 5. Save the file.
 6. Rebuild and restart the Docker container.
 
 ### `rtm` branch considerations
 
-The real-time messaging branch also requires a Node.js proxy server to forward the socket-based requests to Django over HTTP. You can modify the `docker-compose.yml` to add a Node service there, or run it manually:
+The real-time messaging branch also requires a Node.js proxy server to forward the socket-based requests to Django over HTTP. You can modify the [`docker-compose.yml`](docker-compose.yml) to add a Node service there, or run it manually:
 
 ```shell
 cd meetups; source bin/activate; cd repo/rtmProxy
