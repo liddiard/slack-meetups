@@ -118,7 +118,7 @@ After you've completed a few rounds of pairing, you might want to take a look at
 
 - The bot's message content is a bit specific in places and may not match your use case. Luckily, all content is stored within `matcher/messages.py` so it's fairly easy to customize if you want to fork the repo.
 - The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message unless an admin is configured in the `ADMIN_SLACK_USER_ID` environment variable (see "Configuring the web server" section below). If an admin is defined, they will get a DM with "unknown" queries to the bot and have ability to respond to them as the bot.
-- Setting up automated, scheduled matching rounds must be done from the `cron-jobs` file. There is not an admin UI for doing so.
+- Setting up automated, scheduled matching rounds must be done from the [`cron-jobs`](cron-jobs) file. There is not an admin UI for doing so.
 - On the admin side, there's not a ton of input validation, and there are no pool-specific admin permissions. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these models.
 
 ## Setup instructions
