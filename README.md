@@ -122,7 +122,7 @@ After you've completed a few rounds of pairing, you might want to take a look at
 
 - The bot's message content is a bit specific in places and may not match your use case. Luckily, all content is stored within `matcher/messages.py` so it's fairly easy to customize if you want to fork the repo.
 - The bot doesn't respond to text queries, other than to set a person's intro. Aside from that, it will repond with a generic "Sorry, I don't know how to respond!" type of message unless an admin is configured in the `ADMIN_SLACK_USER_ID` environment variable (see "Configuring the web server" section below). If an admin is defined, they will get a DM with "unknown" queries to the bot and have ability to respond to them as the bot.
-- Creation of rounds and round matching is manual: There's no automated scheduling. This could be accomplished fairly easily by setting up [custom Django admin commands](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/) and calling them from a cron job. For a more robust implementation, matching pool frequencies should probably be stored in the database.
+- Setting up automated, scheduled matching rounds must be done from the `cron-jobs` file. There is not an admin UI for doing so.
 - On the admin side, there's not a ton of input validation, and there are no pool-specific admin permissions. The app mostly assumes that admins know what they're doing. If they do something wrong or unusual (like using a non-existent ID for a Slack channel, creating a matching round in the past, etc), unexpected behavior is likely to happen. That said, most of the error-prone tasks are in creating pools (generally an infrequent or one-time thing) and editing matches (which is inadvisable anyway). Using Django's built-in user groups, you can restrict admin users' ability to edit these models.
 
 ## Setup instructions
@@ -254,6 +254,17 @@ server {
     }
 }
 ```
+
+## Scheduled matching rounds
+
+If you want to do recurring matching rounds in a Slack channel and don't want to have to manually log into the admin and press buttons to do it every time, follow these instructions:
+
+1. After creating a matching pool (see User Guide above), open the `cron-jobs` file at the top of the repo.
+2. Uncomment the lines containing `create_round` (for automated round creation – asking availability), and `do_round_matching` (to make 1:1 matches after people have had time to respond).
+3. Set the schedule on which you want each of these things to happen using [cron syntax](https://crontab.guru/#0_10_*_*_1), such as `0 10 * * 1` for 10:00am (server time) every Monday.
+4. Replace the example channel ID (`C07AA3ZH0Q5`) with the one from your matching pool. You can also provide multiple channel IDs separated by spaces.
+5. Save the file.
+6. Rebuild and restart the Docker container.
 
 ### `rtm` branch considerations
 
