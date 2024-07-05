@@ -192,15 +192,21 @@ _Come back to this section later if you don't have a server URL yet._
 
 1. In the top level of the repo, run `cp .env.example .env`
 2. Edit the `.env` example to fill in environment variables, including:
-  - `SECRET_KEY`: required; a long random string for Django's cryptography
-  - `SLACK_API_TOKEN`: required; a bot token to connect to Slack, usually starts with "xoxb-"
-  - `SLACK_SIGNING_SECRET`: required; used to verify that requests are from Slack
-  - `ADMIN_SLACK_USER_ID`: optional; Slack user ID for the admin who will be messaged if the bot receives a message it doesn't know how to act on
+  - Django stuff:
+    - `SECRET_KEY`: a long random string for Django's cryptography
+    - `DJANGO_SUPERUSER_USERNAME`: username to log into the admin
+    - `DJANGO_SUPERUSER_EMAIL`: your email address
+    - `DJANGO_SUPERUSER_PASSWORD`: password to log into the admin 
+  - Slack stuff:
+    - `SLACK_API_TOKEN`: a bot token to connect to Slack, usually starts with "xoxb-"
+    - `SLACK_SIGNING_SECRET`: used to verify that requests are from Slack
+    - `ADMIN_SLACK_USER_ID`: (optional) Slack user ID for the admin who will be messaged if the bot receives a message it doesn't know how to act on
 
 ### Running with Docker (recommended)
 
 1. [Install Docker](https://docs.docker.com/get-docker/)
 2. Run `docker compose up` (add `-d` to run in the background)
+3. Visit http://localhost:8000/admin/ and log in with the credentials you set in the `.env` file
 
 ### Running without Docker
 
@@ -226,8 +232,8 @@ _Come back to this section later if you don't have a server URL yet._
 2. `python manage.py makemigrations matcher` to set up migrations to create the database tables
 3. `python manage.py migrate` to create the database tables
 4. `python manage.py createsuperuser` to create your user to log in to the admin
-5. Start the server! In development this will be `python3 manage.py runserver`. In production this might be `gunicorn meetups.wsgi`.
-6. Log in to the admin and follow the steps above to set up a matching pool. The admin URL is `<your base url>:<port number>/admin/`.
+5. `python manage.py runserver` to start the server
+3. Visit http://localhost:8000/admin/ and log in with the credentials you set in the `.env` file
 
 #### Configuring the Celery task queue
 
