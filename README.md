@@ -274,7 +274,7 @@ If you want to do recurring matching rounds in a Slack channel and don't want to
 5. Save the file.
 6. Rebuild and restart the Docker container.
 
-### `rtm` branch
+## `rtm` branch
 
 Do you need to use the Slack [Real-Time Messaging (RTM) API](https://api.slack.com/rtm) instead of the [Events API](https://api.slack.com/events-api)? Check out the `rtm` branch. You will need to use the RTM API if you're inside a corporate intranet or firewall that won't allow you to receive events from Slack on a publicly accessible URL. 
 
