@@ -1,0 +1,8 @@
+# Uncomment the lines below for automated, scheduled round creation and 
+# matching using a cron job. Make sure you've already added your matching pool
+# in the admin (see readme), and replace the sample channel IDs with yours.
+
+# 0 10 * * 0 /usr/local/bin/python /app/manage.py create_round C07AA3ZH0Q5 >> /var/log/cron.log 2>&1
+# 0 18 * * 0 /usr/local/bin/python /app/manage.py do_round_matching C07AA3ZH0Q5 >> /var/log/cron.log 2>&1
+
+# remember to end this file with an empty new line
