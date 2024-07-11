@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 
 import matcher.messages as messages
 from .tasks import client, send_msg, open_match_dm
+from .constants import QUESTIONS
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +90,17 @@ class Person(models.Model):
     joined = models.DateTimeField(auto_now_add=True)
     joined.help_text = "When this person was first picked up by the bot, "\
         "usually the creation time of the first round in a pool they joined."
+    # it's necessary to keep track of the last query the bot asked the user in
+    # order to respond to text based queries, whereas for block-based queries
+    # the query to which the user is responding is encoded in the block
+    LAST_QUERY_CHOICES = [
+        (QUESTIONS["add_intro"], "add_intro"),
+        (QUESTIONS["update_intro"], "update_intro"),
+    ]
+    last_query = models.CharField(max_length=3, choices=LAST_QUERY_CHOICES,
+        null=True, blank=True)
+    last_query.help_text = "The last question the bot asked the user, so "\
+        "when they reply we know what question they responded to."
 
     class Meta:
         verbose_name_plural = "people"
@@ -190,6 +202,10 @@ def ask_availability(round):
             {"person": person, "pool": pool}
         )
         send_msg.delay(person.user_id, blocks=blocks)
+        # clear any existing last query because this field is only used for
+        # text-based queries, not block-based queries
+        person.last_query = None
+        person.save()
     
     pool = round.pool
     channel_members = get_channel_members(pool.channel_id)
@@ -228,6 +244,8 @@ def ask_availability(round):
                     send_msg.delay(user_id,
                         text=messages.WELCOME_INTRO.format(person=person,
                         pool=pool))
+                    person.last_query = QUESTIONS["add_intro"]
+                    person.save()
         # if a person has joined the pool, create a Person in the database and
         # ask them to introduce themselves
         except Person.DoesNotExist:

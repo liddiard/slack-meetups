@@ -149,7 +149,6 @@ _Come back to this section later if you don't have a server URL yet._
 3. Enter the same base **Request URL** as above, appended with `/slack/message/`.
 4. Under Subscribe to bot events, click **Add Bot User Event** and add the following events:
   - `message.im`
-  - `message.mpim`
   - `app_mention`
 5. **Save Changes**.
 

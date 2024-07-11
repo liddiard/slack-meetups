@@ -73,7 +73,7 @@ class PersonAdmin(admin.ModelAdmin):
     list_display = ("user_name", "full_name", "has_intro", "joined")
     # "pools" cannot be display as an editable field here because of the
     # custom "through" model on the many-to-many relation
-    readonly_fields = ("pools", "joined")
+    readonly_fields = ("pools", "joined", "last_query")
     list_filter = (IntroListFilter, "pools", AvailabilityListFilter)
     ordering = ("-joined",)
     search_fields = ("user_id", "user_name", "full_name", "casual_name")
@@ -188,7 +188,7 @@ def create_matches(round, people_to_match):
       fewer unmatched people remaining to choose from, and this is a greedy
       algorithm that doesn't backtrack. phrased another way, all of the
       non-duplicate options for matches may have been "used up" in previous
-      interations of the loop whne we get to the final few people to match.
+      interations of the loop when we get to the final few people to match.
     """
     if (len(people_to_match) % 2 != 0):
         raise ValueError(f"`people_to_match` must have an even-numbered "

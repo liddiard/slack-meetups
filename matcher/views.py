@@ -7,6 +7,7 @@ from django.views.decorators.cache import cache_page
 
 import matcher.messages as messages
 from meetups.settings import DEBUG, ADMIN_SLACK_USER_ID
+from .constants import QUESTIONS
 from .middleware import VerifySlackRequest
 from .models import (Person, Match, Pool, PoolMembership, Round,
                      get_channel_members as get_channel_members_list)
@@ -52,11 +53,7 @@ def handle_slack_message(request):
     message_text = event.get("text")
     if message_sender == ADMIN_SLACK_USER_ID and get_mention(message_text):
         return send_message_as_bot(message_text)
-    # Currently the only free-text (as opposed to action blocks) message we
-    # expect from the user is their intro. If we wanted to support more text
-    # messages in the future, we'd have to store the last sent message type on
-    # the Person object, probably as a CHOICES enum
-    return update_intro(req["event"])
+    return respond_to_user(req["event"])
 
 
 @decorator_from_middleware(VerifySlackRequest)
@@ -130,38 +127,100 @@ def get_pool_stats(request, channel_name):
     })
 
 
-def update_intro(event):
-    """update a Person's intro with the message text they send, or if the
-    person already has an intro, send a default message
-    """
+def respond_to_user(event):
+    """respond to an incoming Slack message with a message from the bot"""
     user_id = event.get("user")
     message_text = event.get("text", "")
+    # if no user ID is attached to the message, do nothing. this happens
+    # sometimes, not sure why
+    if user_id is None:
+        return HttpResponse(204)
     try:
         person = Person.objects.get(user_id=user_id)
     except Person.DoesNotExist:
         # user is not registered with the bot
         return handle_unknown_message(user_id, message_text)
-    # if this person has an intro already, we aren't expecting any further
-    # messages from them. send them a message telling them how to reach out
-    # if they have questions
-    if person.intro:
-        # user has registered and has an intro, so the bot is not expecting
-        # any particular message from them
+    message_map = {
+        QUESTIONS["add_intro"]: add_intro,
+        QUESTIONS["update_intro"]: update_intro,
+        "prompt_intro_update": prompt_intro_update 
+    }
+    # if we last asked the user something, we expect them to respond to it.
+    # otherwise, we need to determine what the user wants to do
+    query = person.last_query or determine_user_intent(message_text)
+    if not query:
+        # the bot isn't expecting a particular reply from the user and is
+        # unable to determine intent from the message
         return handle_unknown_message(user_id, message_text)
+    try:
+        handler_func = message_map[query]
+    except KeyError:
+        logger.error(f"Unknown last query for {person}: {query}")
+        return JsonResponse(status=500,
+            data={"error": f"unknown last query \"{query}\""})
+    return handler_func(event, person)
+
+
+def determine_user_intent(message):
+    """Infer what the user wants to do based on their message
+    """
+    message = message.lower()
+    if ("update" in message or "change" in message) and \
+        ("bio" in message or "intro" in message):
+        return "prompt_intro_update"
     else:
-        # onboard new Person
-        person.intro = message_text
-        person.save()
-        # automatically set the Person to available for their first time
-        # if people have an issue with this, they can contact
-        # `ADMIN_SLACK_USER_ID`. Might revisit if this causes issues.
-        PoolMembership.objects.filter(person=person).update(available=True)
-        logger.info(f"Onboarded {person} with intro!")
-        message = messages.INTRO_RECEIVED.format(person=person)
-        if ADMIN_SLACK_USER_ID:
-            message += (" " + messages.INTRO_RECEIVED_QUESTIONS)
-        send_msg.delay(user_id, text=message)
-        return HttpResponse(204)
+        return None
+
+
+def add_intro(event, person):
+    """"set the user's message to their intro and welcome them
+    """
+    # onboard new Person
+    person.intro = event.get("text", "")
+    person.last_query = None
+    person.save()
+    # automatically set the Person to available for their first time
+    # if people have an issue with this, they can contact
+    # `ADMIN_SLACK_USER_ID`. Might revisit if this causes issues.
+    PoolMembership.objects.filter(person=person).update(available=True)
+    logger.info(f"Onboarded {person} with intro!")
+    message = messages.INTRO_RECEIVED.format(person=person)
+    if ADMIN_SLACK_USER_ID:
+        message += (" " + messages.INTRO_RECEIVED_QUESTIONS)
+    send_msg.delay(person.user_id, text=message)
+    return HttpResponse(204)
+
+
+def prompt_intro_update(event, person):
+    """"prompt the user to update their intro
+    """
+    message = messages.UPDATE_INTRO_INSTRUCTIONS.format(
+        person=person,
+        person_intro=blockquote(person.intro)
+    )
+    send_msg.delay(person.user_id, text=message)
+    person.last_query = QUESTIONS["update_intro"]
+    person.save()
+    return HttpResponse(204)
+
+
+def update_intro(event, person):
+    """"update the user's intro with the message text they sent
+    """
+    # update Person's intro
+    person.intro = event.get("text", "")
+    person.last_query = None
+    person.save()
+    # automatically set the Person to available for their first time
+    # if people have an issue with this, they can contact
+    # `ADMIN_SLACK_USER_ID`. Might revisit if this causes issues.
+    logger.info(f"Updated intro for {person}")
+    message = messages.INTRO_UPDATED.format(
+        person=person,
+        person_intro=blockquote(person.intro)
+    )
+    send_msg.delay(person.user_id, text=message)
+    return HttpResponse(204)
 
 
 def update_availability(payload, action, pool_id):
@@ -256,10 +315,6 @@ def handle_unknown_message(user_id, message):
     a direct message to the admin, if defined, otherwise respond with a
     generic "Sorry I don't know how to help you" type of message
     """
-    # if no user ID is attached to the message, do nothing. this happens
-    # sometimes, not sure why
-    if user_id is None:
-        return HttpResponse(204)
     logger.info(f"Received unknown query from {user_id}: \"{message}\".")
     if ADMIN_SLACK_USER_ID:
         send_msg.delay(ADMIN_SLACK_USER_ID,

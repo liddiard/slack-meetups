@@ -7,12 +7,14 @@ import copy
 # https://api.slack.com/docs/message-formatting
 
 PERSON_MISSING_NAME = "Sorry, you must have a name set on your Slack profile to participate. Please add your name to your Slack profile."
+
 WELCOME_INTRO = """Welcome, {person.casual_name}! Thanks for joining <#{pool.channel_id}|{pool.channel_name}>. 🎉
 
 Please *introduce yourself* by replying with a short description of what you do. This will be sent to people you pair with.
 
 After I have your introduction, you’ll get your first pairing!
 """
+
 MATCH_INTRO = """*{person_1.casual_name}*, meet your {pool.name} pairing, {person_2.full_name}! Here’s a little about {person_2.casual_name} in their own words:
 
 {person_2_intro}
@@ -25,19 +27,41 @@ MATCH_INTRO = """*{person_1.casual_name}*, meet your {pool.name} pairing, {perso
 
 Message each other below to *pick a time to meet* this week!
 """
+
 UPDATED_AVAILABLE = "Sounds good! I’ll pair you with someone at the start of the next round."
+
 UPDATED_UNAVAILABLE = "Okay, thanks for letting me know. I’ll ask again next time!"
+
 MET = "Great! Hope you enjoyed meeting {other_person.casual_name} 🙂"
+
 DID_NOT_MEET = "Thanks for the feedback! Hope you have a chance to meet next time 🙂"
+
 UNKNOWN_MESSAGE_ADMIN = """_Message from <@{user_id}>:_
 
 {message}
 
 _Respond as the bot by typing_ “<@{user_id}> <your reply>”
 """
+
 UNKNOWN_MESSAGE_NO_ADMIN = "Sorry, I don’t know how to respond to most messages! 😬 If you have a question or feedback, you can contact my admin."
+
 INTRO_RECEIVED = "Thanks for the intro, {person.casual_name}! You’ll receive your first pairing at the start of the next round."
+
 INTRO_RECEIVED_QUESTIONS = "If you have any questions in the meantime, feel free to ask."
+
+UPDATE_INTRO_INSTRUCTIONS = """Sure {person.casual_name}, I can update your intro. Here’s what I have now:
+
+{person_intro}
+
+Please reply with what you would like to change it to.
+"""
+
+INTRO_UPDATED = """I’ve updated your intro to:
+
+{person_intro}
+
+This will be sent to people you pair with going forward!
+"""
 
 BLOCKS = {
     "ASK_IF_MET": [

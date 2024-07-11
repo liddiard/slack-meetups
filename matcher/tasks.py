@@ -133,10 +133,11 @@ def ask_if_met(_, user_id, pool_id):
     import matcher.models as models
     Match = models.Match
     pool = models.Pool.objects.get(pk=pool_id)
+    person = models.Person.objects.get(user_id=user_id)
     # a Person can be either `person_1` or `person_2` on a Match; it's random
     user_matches = (
-        Match.objects.filter(round__pool=pool, person_1__user_id=user_id) |
-        Match.objects.filter(round__pool=pool, person_2__user_id=user_id)
+        Match.objects.filter(round__pool=pool, person_1=person) |
+        Match.objects.filter(round__pool=pool, person_2=person)
     )
     if not user_matches:
         # if the Person hasn't matched with anyone yet, skip sending this
@@ -153,6 +154,10 @@ def ask_if_met(_, user_id, pool_id):
             {"pool": pool, "other_person": other_person}
         )
         send_msg.delay(user_id, blocks=blocks)
+        # clear any existing last query because this field is only used for
+        # text-based queries, not block-based queries
+        person.last_query = None
+        person.save()
     return HttpResponse(204)
 
 
