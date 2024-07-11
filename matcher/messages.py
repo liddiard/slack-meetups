@@ -69,7 +69,7 @@ BLOCKS = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Last time in <#{pool.channel_id}|{pool.channel_name}>, you paired with {other_person.full_name} (<@{other_person.user_id}>). Did you have a chance to meet up with {other_person.casual_name}?"
+                "text": "Last time in <#{pool.channel_id}|{pool.channel_name}>, you paired with {other_person.full_name} (<@{other_person.user_id}>). Did you have a chance to meet with {other_person.casual_name}?"
             }
         },
         {
