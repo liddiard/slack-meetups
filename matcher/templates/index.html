@@ -26,9 +26,9 @@
   <h3>Introduce yourself to Meetups</h3>
   <p>Channel admins decide when rounds of pairing start; it’s often weekly or biweekly. The next time a round starts, Meetups will message you to ask you to introduce yourself:</p>
   <img src="{% static 'images/welcome.png' %}" alt="Screenshot of a conversation showing the Meetups Slack bot greeting a user who has joined a channel and asking them for an introduction." />
-  <p>Simply reply to this message with a short introduction to register for the next round.</p>
+  <p>Reply to this message with a short introduction to register for the next round.</p>
   <h3>Get paired</h3>
-  <p>Some time after you reply (usually up to 24 hours), Meetups will make 1:1 pairings by adding you to a direct message with another person. You’ll be sent each other’s intros there:</p>
+  <p>Sometime after you reply (usually within 24 hours), Meetups will make 1:1 pairings by adding you to a direct message with another person. You’ll be sent each other’s intros there:</p>
   <img src="{% static 'images/pairing.png' %}" alt="Screenshot of a group direct message that Meetups has started among two participants. It shows their intros to each other and tells them to pick a time to meet." />
   <p>Coordinate a time to meet during the week in this chat.</p>
   <h3>Future pairings</h3>
@@ -36,11 +36,11 @@
   <img src="{% static 'images/ask_availability.png' %}" alt="Screenshot of Meetups asking if the user wants to meet up with someone this week, with options to opt in or skip." />
   <p>Busy week? No worries, you can skip and join another time. Meetups requires everyone to opt in to being paired each round to ensure ongoing interest and availability among participants.</p>
   <h3>Giving feedback</h3>
-  <p>After you’ve been through a round of pairing, Meetups may ask if you actually met up with the person you paired with:</p>
+  <p>After you’ve been through a pairing round, Meetups may ask if you actually met up with the person you paired with:</p>
   <img src="{% static 'images/ask_if_met.png' %}" alt="Screenshot of Meetups asking if the user met with their last pairing, with options for yes and no." />
   <p>If you did – or didn’t – please let it know!</p>
   <h3>Viewing channel stats</h3>
-  <p>Meetups automatically aggregates statistics about pairing channels. This includes how many pairings were made, how many people have actually met, a leaderboard, and a network graph of who’s met who. For your workspace, the stats page(s) are available here:</p>
+  <p>Meetups automatically compiles statistics about pairing channels. This includes how many pairings were made, how many people have actually met, a leaderboard, and a network graph of who’s met who. For your workspace, the stats page(s) are available here:</p>
   <ul>
     {% for pool in pools %}
     <li><a href="{% url 'pool_stats' pool.channel_name %}">#{{ pool.channel_name }}</a></li>
