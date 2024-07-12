@@ -10,7 +10,7 @@ PERSON_MISSING_NAME = "Sorry, you must have a name set on your Slack profile to 
 
 WELCOME_INTRO = """Welcome, {person.casual_name}! Thanks for joining <#{pool.channel_id}|{pool.channel_name}>. 🎉
 
-Please *introduce yourself* by replying with a short description of what you do. This will be sent to people you pair with.
+Please *introduce yourself* by replying with a short description. This will be sent to people you pair with.
 
 After I have your introduction, you’ll get your first pairing!
 """
