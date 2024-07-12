@@ -5,8 +5,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
   <title>Slack Meetups</title>
+  <meta property="og:title" content="Slack Meetups" />
+  <meta property="og:description" content="Meetups is a Slack bot that helps you meet interesting people by randomly pairing users in a Slack channel for 1:1 chats." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="{{ page_uri }}" />
+  <!-- Build absolute URI to image (required for Open Graph tags) https://stackoverflow.com/a/54404978/2487925 -->
+  <meta property="og:image" content="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static 'images/bot_logo_thumb.png' %}" />
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
   <link rel="stylesheet" href="{% static 'styles/home.css' %}" />
 </head>
 <body>
