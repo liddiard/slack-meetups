@@ -17,7 +17,7 @@
   <h1><img class="logo" src="{% static 'images/bot_logo_thumb.png' %}" alt="" /> Meetups</h1>
   <p>Welcome to Meetups, a Slack bot that helps you meet interesting people in your company or organization! It randomly pairs people in a Slack channel for 1:1 chats.</p>
   <h2>How it works</h2>
-  <p>To participate, join a Slack channel that’s using Meetups. On your Slack workspace, that is:</p>
+  <p>To participate, join a Slack channel that’s using Meetups. In your Slack workspace, that is:</p>
   <ul>
     {% for pool in pools %}
     <li>#{{ pool.channel_name }}</li>
