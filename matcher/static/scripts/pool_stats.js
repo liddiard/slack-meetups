@@ -13,7 +13,7 @@ async function main() {
   document.getElementById('participant-count').innerText = pool.participant_count;
   document.getElementById('round-count').innerText = pool.round_count;
   document.getElementById('matches-count').innerText = pool.matches.length;
-  document.getElementById('avg-round-size').innerText = Math.round((pool.matches.length * 2) / pool.round_count);
+  document.getElementById('avg-round-size').innerText = pool.round_count ? Math.round((pool.matches.length * 2) / pool.round_count) : 'N/A';
   document.getElementById('meetup-rate').innerText = `${Math.round((pool.matches.filter(match => match.met).length / pool.matches.length) * 100) || 'N/A'}%`;
   
   // populate the leaderboard
