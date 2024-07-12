@@ -1,0 +1,27 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  font-size: 1.2em;
+  max-width: 640px;
+  padding: 0 1em;
+  margin: 0 auto 2em;
+  line-height: 1.35;
+}
+
+h1, h2 {
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+  padding-bottom: 0.1em;
+}
+
+img {
+  max-width: 100%;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  vertical-align: sub;
+}

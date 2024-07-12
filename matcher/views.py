@@ -2,6 +2,7 @@ import json
 import logging
 
 from django.http import HttpResponse, JsonResponse
+from django.views.generic.base import TemplateView
 from django.utils.decorators import decorator_from_middleware
 from django.views.decorators.cache import cache_page
 
@@ -17,6 +18,15 @@ from .utils import (get_person_from_match, get_other_person_from_match,
 
 
 logger = logging.getLogger(__name__)
+
+
+class HomePageView(TemplateView):
+    template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pools'] = Pool.objects.all()
+        return context
 
 
 @decorator_from_middleware(VerifySlackRequest)

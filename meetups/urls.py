@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -23,7 +23,7 @@ from matcher import views
 
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="index.html"), name="home"),
+    path("", views.HomePageView.as_view(), name="home"),
     path("admin/", admin.site.urls, name="admin"),
     path("slack/action/", views.handle_slack_action, name="slack_action"),
     path("slack/message/", views.handle_slack_message, name="slack_message"),
@@ -31,7 +31,7 @@ urlpatterns = [
         name="pool_stats"),
     path("stats/<channel_name>/",
         TemplateView.as_view(template_name="pool_stats.html"),
-        name="pool_stats_page"),
+        name="pool_stats"),
     path("utils/members/<channel_id>/", views.get_channel_members,
         name="channel_members")
 ]

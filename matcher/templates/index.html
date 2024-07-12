@@ -7,20 +7,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
   <title>Slack Meetups</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-    }
-    body {
-      font-family: system-ui;
-      max-width: 650px;
-      padding: 1em;
-      margin: 0 auto;
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'styles/home.css' %}" />
 </head>
 <body>
-  <h1>Slack Meetups is running!</h1>
-  <p>…but there’s nothing to do here. Check <a href="https://github.com/liddiard/slack-meetups/blob/master/README.md"> the readme</a> for more info.</p>
+  <h1><img class="logo" src="{% static 'images/bot_logo_thumb.png' %}" alt="" /> Slack Meetups</h1>
+  <p>Welcome to Meetups, a Slack bot that helps you meet interesting people in your company or organization! It randomly pairs people in a Slack channel for 1:1 chats.</p>
+  <h2>How it works</h2>
+  <p>To participate, join a Slack channel that is using Meetups. On your Slack workspace, that’s:</p>
+  <ul>
+    {% for pool in pools %}
+    <li>#{{ pool.channel_name }}</li>
+    {% endfor %}
+  </ul> 
+  <h3>Introduce yourself to Meetups</h3>
+  <p>Channel admins decide when rounds of pairing start; it’s often weekly or biweekly. The next time a round starts, Meetups will message you to ask you to introduce yourself:</p>
+  <img src="{% static 'images/welcome.png' %}" alt="Screenshot of a conversation showing the Meetups Slack bot greeting a user who has joined a channel and asking them for an introduction." />
+  <p>Simply reply to this message with a short introduction to register for the next round.</p>
+  <h3>Get paired</h3>
+  <p>Some time after you reply (usually up to 24 hours), Meetups will make 1:1 pairings by adding you to a direct message with another person. You’ll be sent each other’s intros there:</p>
+  <img src="{% static 'images/pairing.png' %}" alt="Screenshot of a group direct message that Meetups has started among two participants. It shows their intros to each other and tells them to pick a time to meet." />
+  <p>Coordinate a time to meet during the week in this chat.</p>
+  <h3>Future pairings</h3>
+  <p>After participating in a pairing round for the first time, Meetups will ask if you’re want to participate in each future round:</p>
+  <img src="{% static 'images/ask_availability.png' %}" alt="Screenshot of Meetups asking if the user wants to meet up with someone this week, with options to opt in or skip." />
+  <p>Busy week? No worries, you can skip a round and join next time. Meetups requires everyone to opt in to being paired each round to ensure ongoing interest and availability among participants.</p>
+  <h3>Giving feedback</h3>
+  <p>After you’ve been through a round of pairing, Meetups may ask if you actually met up with the person you paired with:</p>
+  <img src="{% static 'images/ask_if_met.png' %}" alt="Screenshot of Meetups asking if the user met with their last pairing, with options for yes and no." />
+  <p>If you did – or didn’t – please let it know!</p>
+  <h3>Viewing channel stats</h3>
+  <p>Meetups automatically aggregates statistics about pairing channels. This includes how many pairings were made, how many people have actually met, a leaderboard, and a network graph of who’s met who. For your workspace, the stats page(s) are available here:</p>
+  <ul>
+    {% for pool in pools %}
+    <li><a href="{% url 'pool_stats' pool.channel_name %}">#{{ pool.channel_name }}</a></li>
+    {% endfor %}
+  </ul>
+  <h2>FAQ</h2>
+  <h3>How does Meetups decide who to pair?</h3>
+  <p>Meetups randomly pairs people while trying to avoid pairs that have been made previously. For curious nerds, you can find the <a href="https://github.com/liddiard/slack-meetups/blob/cf2cdde05febcfe56976bcc9308c3a2ff0d11596/matcher/admin.py#L171">pairing algorithm here</a>.</p>
+  <h3>How can I update my intro text?</h3>
+  <p>Just message Meetups “update intro” (or similar phrases). It will ask you for your new intro text.</p>
+  <h3>I messaged Meetups and it didn’t reply. What’s up with that?</h3>
+  <p>Most likely, it was a message that Meetups didn’t know how to respond to, which frankly is most free-text queries. Unknown queries are sent to your Meetups bot admin who may later respond to you from the bot.</p>
+  <h3>Can I participate in multiple channels’ meetups?</h3>
+  <p>Yes! Just join your channels of interest. Meetups will use your same intro text across all channels, but it will allow you to individually opt in or out of each channel’s pairings every round.</p>
+  <h3>How do I stop receiving messages from Meetups?</h3>
+  <p>Meetups works purely on channel membership for who to message. If you’re no longer interested in participating, just leave the channel(s) where it’s used and you’ll stop receiving messages. You can always rejoin later to resume receiving messages about opting in for pairing.</p>
+  <h3>How can I set up Meetups on my own Slack workspace?</h3>
+  <p>Meetups is an open-source project. See the code and learn how to set it up <a href="https://github.com/liddiard/slack-meetups#readme">on GitHub</a>!</p>
 </body>
 </html>
