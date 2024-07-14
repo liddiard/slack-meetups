@@ -277,6 +277,8 @@ def ask_availability(round):
             logger.info(f"Added {person} to pool \"{pool}\".")
             send_msg.delay(user_id,
                 text=messages.WELCOME_INTRO.format(person=person, pool=pool))
+            person.last_query = QUESTIONS["add_intro"]
+            person.save()
     logger.info(f"Sent messages to ask availability for round \"{round}\".")
 
 
