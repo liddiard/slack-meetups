@@ -15,7 +15,7 @@ services:
       - rabbitmq
       - celery
     networks:
-      - meetups_network
+      - app_network
     restart: unless-stopped
 
   celery:
@@ -29,7 +29,7 @@ services:
     depends_on:
       - rabbitmq
     networks:
-      - meetups_network
+      - app_network
     restart: unless-stopped
 
   rabbitmq:
@@ -39,9 +39,9 @@ services:
       - "15672:15672"  # RabbitMQ management console
       - "5672:5672"    # RabbitMQ default port
     networks:
-      - meetups_network
+      - app_network
     restart: unless-stopped
 
 networks:
-  meetups_network:
+  app_network:
     driver: bridge
