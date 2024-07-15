@@ -1,6 +1,8 @@
+name: meetups
+
 services:
   django:
-    container_name: django
+    container_name: meetups_django
     entrypoint: /app/entrypoint.sh
     build: .
     volumes:
@@ -13,11 +15,11 @@ services:
       - rabbitmq
       - celery
     networks:
-      - app-network
+      - meetups_network
     restart: unless-stopped
 
   celery:
-    container_name: celery
+    container_name: meetups_celery
     build: .
     command: celery -A matcher.tasks worker --loglevel=info
     volumes:
@@ -27,19 +29,19 @@ services:
     depends_on:
       - rabbitmq
     networks:
-      - app-network
+      - meetups_network
     restart: unless-stopped
 
   rabbitmq:
-    container_name: rabbitmq
+    container_name: meetups_rabbitmq
     image: "rabbitmq:3-management"
     ports:
       - "15672:15672"  # RabbitMQ management console
       - "5672:5672"    # RabbitMQ default port
     networks:
-      - app-network
+      - meetups_network
     restart: unless-stopped
 
 networks:
-  app-network:
+  meetups_network:
     driver: bridge
