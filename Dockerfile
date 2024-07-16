@@ -36,4 +36,4 @@ COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Expose the port that the Gunicorn server will run on
-EXPOSE 8000
+EXPOSE $PORT

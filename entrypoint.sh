@@ -16,4 +16,4 @@ python manage.py createsuperuser --no-input
 service cron start
 
 # Start Gunicorn server
-exec gunicorn meetups.wsgi:application --bind 0.0.0.0:8000
+exec gunicorn meetups.wsgi:application --bind 0.0.0.0:$PORT
