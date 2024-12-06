@@ -1,4 +1,4 @@
-Django==5.0.9
+Django==5.0.10
 slackclient==2.9.4
 celery==5.4.0
 whitenoise==6.7.0
