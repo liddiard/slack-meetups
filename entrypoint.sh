@@ -7,8 +7,8 @@ python manage.py makemigrations matcher
 python manage.py migrate
 python manage.py createsuperuser --no-input
 
-# Start supercronic
-supercronic /app/cron-jobs
+# Start supercronic and put it in the background
+supercronic /app/cron-jobs &
 
 # Start Gunicorn server
 exec gunicorn meetups.wsgi:application --bind 0.0.0.0:$PORT
