@@ -1,7 +1,7 @@
-Django==5.0.7
+Django==5.1.4
 slackclient==2.9.4
 celery==5.4.0
-whitenoise==6.7.0
+whitenoise==6.8.2
 python-dotenv==1.0.1
 gunicorn
 pytz
