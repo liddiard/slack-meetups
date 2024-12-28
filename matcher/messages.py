@@ -121,7 +121,7 @@ BLOCKS = {
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "Not this week, maybe later"
+                        "text": "Not this time"
                     },
                     "value": "no"
                 }
