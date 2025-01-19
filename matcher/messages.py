@@ -113,7 +113,7 @@ BLOCKS = {
                     "style": "primary",
                     "text": {
                         "type": "plain_text",
-                        "text": "Yes, I want to be paired!"
+                        "text": "Yes, I want to be paired"
                     },
                     "value": "yes"
                 },
