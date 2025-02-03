@@ -32,18 +32,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "meetups.harrisonliddiard.com",
-    ".ngrok.io",
-    ".lhr.life" # https://localhost.run
-]
+ALLOWED_HOSTS = ["*"]
 
 # https://docs.djangoproject.com/en/5.0/ref/settings/#csrf-trusted-origins
-CSRF_TRUSTED_ORIGINS = [
-    "https://meetups.harrisonliddiard.com",
-]
+CSRF_TRUSTED_ORIGINS = []
 
 # Application definition
 
